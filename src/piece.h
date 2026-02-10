@@ -18,4 +18,6 @@ public:
 	void drawPiece(int r, int c);
 	bool isAliveFun() const;
 	Texture2D m_texFun() const;
+	PieceType m_typeFun() const;
+	PieceColor m_colorFun() const;
 };

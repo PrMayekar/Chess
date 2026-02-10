@@ -92,3 +92,37 @@ void Board::drawBoard()
 		}
 	}
 }
+
+bool Board::pieceIsAlive(int r,int c)
+{
+	if (pieces[r][c].isAliveFun() == true)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+
+Texture2D Board::pieceTex(int r, int c) const
+{
+	return pieces[r][c].m_texFun();
+}
+
+PieceType Board::pieceType(int r, int c) const
+{
+	return pieces[r][c].m_typeFun();
+}
+
+PieceColor Board::pieceColor(int r, int c) const
+{
+	return pieces[r][c].m_colorFun();
+}
+
+void Board::updatePiecePosition(int r, int c, int or, int oc)
+{
+	pieces[r][c] = pieces[or][oc];
+	pieces[or][oc] = Piece();
+}

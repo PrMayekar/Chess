@@ -5,7 +5,7 @@
 #include "utils.h"
 
 Piece::Piece()
-	:m_type(NONE), m_color(), m_tex(), m_isAlive(false)
+	:m_type(NONE), m_color(LIGHT), m_tex(), m_isAlive(false)
 {
 }
 
@@ -37,10 +37,28 @@ void Piece::drawPiece(int r, int c)
 
 bool Piece::isAliveFun() const
 {
-	return m_isAlive;
+	if (m_isAlive == true)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+	
 }
 
 Texture2D Piece::m_texFun() const
 {
 	return m_tex;
+}
+
+PieceType Piece::m_typeFun() const
+{
+	return m_type;
+}
+
+PieceColor Piece::m_colorFun() const
+{
+	return m_color;
 }

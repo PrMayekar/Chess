@@ -9,3 +9,8 @@ enum PieceColor
 {
 	DARK, LIGHT
 };
+
+enum class STATE
+{
+	SELECT_PIECE, SELECT_DESTINATION
+};
