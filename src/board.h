@@ -1,6 +1,7 @@
 #pragma once
 #include "tile.h"
 #include "piece.h"
+#include "utils.h"
 #define TILES 8
 #define TILESIZE 100
 
@@ -19,4 +20,5 @@ public:
 	PieceType pieceType(int r, int c) const;
 	PieceColor pieceColor(int r, int c) const;
 	void updatePiecePosition(int r, int c, int or, int oc);
+	bool validateNewPosition(int r, int c, int or , int oc);
 };

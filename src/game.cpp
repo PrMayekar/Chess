@@ -39,7 +39,7 @@ bool Game::checkMouseCoord2(Board& board)
 	{
 		int tc = (int)mouse2.x / 100;
 		int tr = (int)mouse2.y / 100;
-		if (board.pieceIsAlive(tr, tc) == false)
+		if ((board.pieceIsAlive(tr, tc) == false) || ((board.pieceIsAlive(tr, tc) == true) && (board.pieceColor(tr, tc) != currentTurn)))
 		{
 			nr = tr;
 			nc = tc; 
@@ -91,20 +91,26 @@ void Game::initialize()
 			{
 				if (checkMouseCoord2(board)==true)
 				{
-					board.updatePiecePosition(nr, nc, r, c);
-					if (currentTurn == PieceColor::LIGHT)
+					if (board.validateNewPosition(nr, nc, r, c) == true)
 					{
-						currentTurn = PieceColor::DARK;
+						board.updatePiecePosition(nr, nc, r, c);
+						if (currentTurn == PieceColor::LIGHT)
+						{
+							currentTurn = PieceColor::DARK;
+						}
+						else
+						{
+							currentTurn = PieceColor::LIGHT;
+						}
+						currentState = STATE::SELECT_PIECE;
 					}
 					else
 					{
-						currentTurn = PieceColor::LIGHT;
+						currentState = STATE::SELECT_PIECE;
 					}
-					currentState = STATE::SELECT_PIECE;
 				}
 			}
 		}
-
 		EndDrawing();
 	}
 	CloseWindow();

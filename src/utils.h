@@ -1,13 +1,13 @@
 #pragma once
 
-enum PieceType
+enum class PieceType
 {
 	NONE, PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING
 };
 
-enum PieceColor
+enum class PieceColor
 {
-	DARK, LIGHT
+	DARK, LIGHT, NONE
 };
 
 enum class STATE

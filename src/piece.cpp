@@ -5,7 +5,7 @@
 #include "utils.h"
 
 Piece::Piece()
-	:m_type(NONE), m_color(LIGHT), m_tex(), m_isAlive(false)
+	:m_type(PieceType::NONE), m_color(PieceColor::NONE), m_tex(), m_isAlive(false)
 {
 }
 

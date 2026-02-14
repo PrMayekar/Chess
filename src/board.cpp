@@ -1,5 +1,6 @@
 #include "board.h"
 
+
 Board::Board()
 {
 	for (int i = 0; i < TILES; i++)
@@ -30,39 +31,39 @@ Board::Board()
 
 	for (int i = 0; i < TILES; i++)
 	{
-		pieces[1][i] = Piece(PAWN, DARK, darkPawn, true);
+		pieces[1][i] = Piece(PieceType::PAWN, PieceColor::DARK, darkPawn, true);
 	}
 
 	for (int i = 0; i < TILES; i++)
 	{
-		pieces[6][i] = Piece(PAWN, LIGHT, lightPawn, true);
+		pieces[6][i] = Piece(PieceType::PAWN, PieceColor::LIGHT, lightPawn, true);
 	}
 
-	pieces[0][0] = Piece(ROOK, DARK, darkRook, true);
-	pieces[0][7] = Piece(ROOK, DARK, darkRook, true);
+	pieces[0][0] = Piece(PieceType::ROOK, PieceColor::DARK, darkRook, true);
+	pieces[0][7] = Piece(PieceType::ROOK, PieceColor::DARK, darkRook, true);
 
-	pieces[0][1] = Piece(KNIGHT, DARK, darkKnight, true);
-	pieces[0][6] = Piece(KNIGHT, DARK, darkKnight, true);
+	pieces[0][1] = Piece(PieceType::KNIGHT, PieceColor::DARK, darkKnight, true);
+	pieces[0][6] = Piece(PieceType::KNIGHT, PieceColor::DARK, darkKnight, true);
 
-	pieces[0][2] = Piece(BISHOP, DARK, darkBishop, true);
-	pieces[0][5] = Piece(BISHOP, DARK, darkBishop, true);
+	pieces[0][2] = Piece(PieceType::BISHOP, PieceColor::DARK, darkBishop, true);
+	pieces[0][5] = Piece(PieceType::BISHOP, PieceColor::DARK, darkBishop, true);
 
-	pieces[0][3] = Piece(QUEEN, DARK, darkQueen, true);
-	pieces[0][4] = Piece(KING, DARK, darkKing, true);
+	pieces[0][3] = Piece(PieceType::QUEEN, PieceColor::DARK, darkQueen, true);
+	pieces[0][4] = Piece(PieceType::KING, PieceColor::DARK, darkKing, true);
 
 
 
-	pieces[7][0] = Piece(ROOK, LIGHT, lightRook, true);
-	pieces[7][7] = Piece(ROOK, LIGHT, lightRook, true);
+	pieces[7][0] = Piece(PieceType::ROOK, PieceColor::LIGHT, lightRook, true);
+	pieces[7][7] = Piece(PieceType::ROOK, PieceColor::LIGHT, lightRook, true);
 
-	pieces[7][1] = Piece(KNIGHT, LIGHT, lightKnight, true);
-	pieces[7][6] = Piece(KNIGHT, LIGHT, lightKnight, true);
+	pieces[7][1] = Piece(PieceType::KNIGHT, PieceColor::LIGHT, lightKnight, true);
+	pieces[7][6] = Piece(PieceType::KNIGHT, PieceColor::LIGHT, lightKnight, true);
 
-	pieces[7][2] = Piece(BISHOP, LIGHT, lightBishop, true);
-	pieces[7][5] = Piece(BISHOP, LIGHT, lightBishop, true);
+	pieces[7][2] = Piece(PieceType::BISHOP, PieceColor::LIGHT, lightBishop, true);
+	pieces[7][5] = Piece(PieceType::BISHOP, PieceColor::LIGHT, lightBishop, true);
 
-	pieces[7][3] = Piece(QUEEN, LIGHT, lightQueen, true);
-	pieces[7][4] = Piece(KING, LIGHT, lightKing, true);
+	pieces[7][3] = Piece(PieceType::QUEEN, PieceColor::LIGHT, lightQueen, true);
+	pieces[7][4] = Piece(PieceType::KING, PieceColor::LIGHT, lightKing, true);
 
 }
 
@@ -125,4 +126,181 @@ void Board::updatePiecePosition(int r, int c, int or, int oc)
 {
 	pieces[r][c] = pieces[or][oc];
 	pieces[or][oc] = Piece();
+}
+
+bool Board::validateNewPosition(int r, int c, int or , int oc)
+{
+	PieceType selectedPiece = pieceType(or , oc);
+
+	if (selectedPiece == PieceType::ROOK)
+	{
+		if (r!=or && c != oc)
+		{
+			return false;
+		}
+
+		int stepR = 0;
+		int stepC=0;
+		
+		if (r==or)
+			stepC = (c > oc) ? 1 : -1;
+		else
+			stepR = (r > or ) ? 1 : -1;
+
+		int i = or + stepR;
+		int j = oc + stepC;
+
+		while (i != r || j != c)
+		{
+			if (pieces[i][j].isAliveFun())
+				return false;
+
+			i += stepR;
+			j += stepC;
+		}
+		return true;
+	}
+	else if (selectedPiece == PieceType::BISHOP)
+	{
+		if (abs(r - or ) != abs(c - oc))
+			return false;
+
+		int stepR = (r > or ) ? 1 : -1;
+		int stepC = (c > oc) ? 1 : -1;
+
+		int i = or +stepR;
+		int j = oc + stepC;
+
+		while (i != r)
+		{
+			if (pieces[i][j].isAliveFun())
+				return false;
+
+			i += stepR;
+			j += stepC;
+		}
+
+		return true;
+	}
+
+
+	else if (selectedPiece == PieceType::KNIGHT)
+	{ 
+		if ((abs(c - oc) == 2 && abs(r - or ) == 1) || (abs(c - oc) == 1 && abs(r - or ) == 2))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else if (selectedPiece == PieceType::QUEEN)
+	{
+		if (r==or || c == oc)
+		{
+			int stepR = 0;
+			int stepC = 0;
+
+			if (r==or)
+				stepC = (c > oc) ? 1 : -1;
+			else
+				stepR = (r > or ) ? 1 : -1;
+
+			int i = or +stepR;
+			int j = oc + stepC;
+
+			while (i != r || j != c)
+			{
+				if (pieces[i][j].isAliveFun())
+					return false;
+
+				i += stepR;
+				j += stepC;
+			}
+			return true;
+		}
+		else if (abs(r - or ) == abs(c - oc))
+		{
+			int stepR = (r > or ) ? 1 : -1;
+			int stepC = (c > oc) ? 1 : -1;
+
+			int i = or +stepR;
+			int j = oc + stepC;
+
+			while (i != r)
+			{
+				if (pieces[i][j].isAliveFun())
+					return false;
+
+				i += stepR;
+				j += stepC;
+			}
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else if (selectedPiece == PieceType::KING)
+	{
+		int i = or ;
+		int j = oc ;
+
+		if ((i - 1 >= 0 && j - 1 >= 0) && (i - 1 == r && j - 1 == c))
+		{
+			return true;
+		}
+		else if ((i + 1 < 8 && j - 1 >= 0) && (i + 1 == r && j - 1 == c))
+		{
+			return true;
+		}
+		else if ((i - 1 >= 0 && j + 1 < 8) && (i - 1 == r && j + 1 == c))
+		{
+			return true;
+		}
+		else if ((i + 1 < 8 && j + 1 < 8) && (i + 1 == r && j + 1 == c))
+		{
+			return true;
+		}
+		else if ((i - 1 >= 0 && i - 1 == r) && (j == c))
+		{
+			return true;
+		}
+		else if ((i + 1 < 8 && i + 1 == r) && (j==c))
+		{
+			return true;
+		}
+		else if ((j - 1 >= 0 && j - 1 == c) && (i==r))
+		{
+			return true;
+		}
+		else if ((j + 1 < 8 && j + 1 == c) && (i==r))
+		{
+			return true;
+		}
+		return false;
+	}
+	else if (selectedPiece == PieceType::PAWN)
+	{
+		if (c != oc)
+			return false;
+
+		if (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT)
+		{
+			if ((r==or-1) || ((or==6) && (r==or-2)))
+				return true;
+			else
+				return false;
+		}
+		else
+		{
+			if ((r==or+1) || ((or == 1) && (r==or+2)))
+				return true;
+			else
+				return false;
+		}
+	}
 }
