@@ -285,22 +285,58 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 	}
 	else if (selectedPiece == PieceType::PAWN)
 	{
-		if (c != oc)
-			return false;
-
-		if (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT)
+		if (c == oc)
 		{
-			if ((r==or-1) || ((or==6) && (r==or-2)))
-				return true;
+			if (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT)
+			{
+				if (((r==or-1) || ((or==6) && (r==or-2))) && (pieces[r][c].isAliveFun()==false))
+					return true;
+				else
+					return false;
+			}
 			else
-				return false;
+			{
+				if (((r==or+1) || ((or == 1) && (r==or+2))) && (pieces[r][c].isAliveFun() == false))
+					return true;
+				else
+					return false;
+			}
 		}
 		else
 		{
-			if ((r==or+1) || ((or == 1) && (r==or+2)))
-				return true;
+			if (abs(r - or ) == 1 && abs(c - oc) == 1)
+			{
+				if (pieces[or][oc].m_colorFun() == PieceColor::LIGHT)
+				{
+					if ((r < or ) && ((pieces[r][c].isAliveFun() == true) && (pieces[r][c].m_colorFun() == PieceColor::DARK)))
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				else if (pieces[or ][oc].m_colorFun() == PieceColor::DARK)
+				{
+					if ((r > or ) && ((pieces[r][c].isAliveFun() == true) && (pieces[r][c].m_colorFun() == PieceColor::LIGHT)))
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				else
+				{
+					return false;
+				}
+			}
 			else
+			{
 				return false;
+			}
 		}
 	}
 }
