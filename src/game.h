@@ -16,7 +16,9 @@ protected:
 	int nc;
 	bool nextFlag = false;
 	Piece selectPiece;
+	Piece capturedPiece;
 	PieceColor currentTurn;
+	bool check = false;
 
 public:
 	Game();
@@ -24,5 +26,4 @@ public:
 	bool checkMouseCoord(Board& board);
 	void initialize();
 	void start();
-
 };

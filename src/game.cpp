@@ -75,7 +75,6 @@ void Game::initialize()
 		board.drawPieces();
 
 		if (currentState == STATE::SELECT_PIECE) {
-
 			if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 			{
 				if (checkMouseCoord(board)==true)
@@ -83,7 +82,6 @@ void Game::initialize()
 					currentState = STATE::SELECT_DESTINATION;
 				}
 			}
-
 		}
 		else if (currentState == STATE::SELECT_DESTINATION)
 		{
@@ -92,22 +90,51 @@ void Game::initialize()
 				if (checkMouseCoord2(board)==true)
 				{
 					if (board.validateNewPosition(nr, nc, r, c) == true)
-					{
-						board.updatePiecePosition(nr, nc, r, c);
-						if (currentTurn == PieceColor::LIGHT)
+					{	
+						if (board.pieceIsAlive(nr, nc))
 						{
-							currentTurn = PieceColor::DARK;
+							capturedPiece = Piece(board.pieceType(nr, nc), board.pieceColor(nr, nc), board.pieceTex(nr, nc), true);
 						}
 						else
 						{
-							currentTurn = PieceColor::LIGHT;
+							capturedPiece = Piece(board.pieceType(r, c), board.pieceColor(r, c), board.pieceTex(r, c), false);
 						}
-						currentState = STATE::SELECT_PIECE;
+						board.updatePiecePosition(nr, nc, r, c);
+						if (!board.checkForCheck(currentTurn))
+						{
+							if (currentTurn == PieceColor::LIGHT)
+							{
+								currentTurn = PieceColor::DARK;
+							}
+							else
+							{
+								currentTurn = PieceColor::LIGHT;
+							}
+							currentState = STATE::SELECT_PIECE;
+						}
+						else
+						{
+							if (capturedPiece.isAliveFun())
+							{
+								board.updatePiecePosition(r, c, nr, nc);
+								board.addNewPiece(nr, nc, capturedPiece);
+								capturedPiece = Piece(board.pieceType(nr, nc), board.pieceColor(nr, nc), board.pieceTex(nr, nc), false);
+							}
+							else
+							{
+								board.updatePiecePosition(r, c, nr, nc);
+							}
+							currentState = STATE::SELECT_PIECE;
+						}
 					}
 					else
 					{
 						currentState = STATE::SELECT_PIECE;
 					}
+				}
+				else
+				{
+					currentState = STATE::SELECT_PIECE;
 				}
 			}
 		}

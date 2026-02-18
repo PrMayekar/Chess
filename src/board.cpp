@@ -1,6 +1,5 @@
 #include "board.h"
 
-
 Board::Board()
 {
 	for (int i = 0; i < TILES; i++)
@@ -28,6 +27,19 @@ Board::Board()
 	Texture2D lightKing = LoadTexture("assets/Chess_klt60.png");
 	Texture2D darkKing = LoadTexture("assets/Chess_kdt60.png");
 
+
+    // Promotion window intialization
+
+
+	lightPromotion[0] = Piece(PieceType::ROOK, PieceColor::LIGHT, lightRook, true);
+	lightPromotion[1] = Piece(PieceType::KNIGHT, PieceColor::LIGHT, lightBishop, true);
+	lightPromotion[2] = Piece(PieceType::BISHOP, PieceColor::LIGHT, lightKnight, true);
+	lightPromotion[3] = Piece(PieceType::QUEEN, PieceColor::LIGHT, lightQueen, true);
+
+	darkPromotion[0] = Piece(PieceType::ROOK, PieceColor::DARK, darkRook, true);
+	darkPromotion[1] = Piece(PieceType::KNIGHT, PieceColor::DARK, darkBishop, true);
+	darkPromotion[2] = Piece(PieceType::BISHOP, PieceColor::DARK, darkKnight, true);
+	darkPromotion[3] = Piece(PieceType::QUEEN, PieceColor::DARK, darkQueen, true);
 
 	for (int i = 0; i < TILES; i++)
 	{
@@ -126,6 +138,11 @@ void Board::updatePiecePosition(int r, int c, int or, int oc)
 {
 	pieces[r][c] = pieces[or][oc];
 	pieces[or][oc] = Piece();
+}
+
+void Board::addNewPiece(int r, int c, Piece piece)
+{
+	pieces[r][c] = piece;
 }
 
 bool Board::validateNewPosition(int r, int c, int or , int oc)
@@ -253,7 +270,7 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 		{
 			return true;
 		}
-		else if ((i + 1 < 8 && j - 1 >= 0) && (i + 1 == r && j - 1 == c))
+		else if ((i + 1 < 8 && j - 1 >= 0) && (i + 1 == r && j - 1 == c)) 
 		{
 			return true;
 		}
@@ -289,14 +306,18 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 		{
 			if (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT)
 			{
-				if (((r==or-1) || ((or==6) && (r==or-2))) && (pieces[r][c].isAliveFun()==false))
+				if (((r==or-1) || ((pieces[or -1][oc].isAliveFun() == false) && ((or==6) && (r==or-2)))) && (pieces[r][c].isAliveFun() == false))
+				{
 					return true;
+				}	
 				else
+				{
 					return false;
+				}
 			}
 			else
 			{
-				if (((r==or+1) || ((or == 1) && (r==or+2))) && (pieces[r][c].isAliveFun() == false))
+				if (((r==or+1) || ((pieces[or +1][oc].isAliveFun() == false) && ((or == 1) && (r==or+2)))) && (pieces[r][c].isAliveFun() == false))
 					return true;
 				else
 					return false;
@@ -339,4 +360,376 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 			}
 		}
 	}
+	return false;
 }
+
+bool Board::checkForCheck(PieceColor col)
+{
+
+	PieceColor oppositeColor;
+	if (col == PieceColor::DARK)
+	{
+		oppositeColor = PieceColor::LIGHT;
+	}
+	else if(col == PieceColor::LIGHT)
+	{
+		oppositeColor = PieceColor::DARK;
+	}
+	int or ;
+	int oc ; 
+	for (int i = 0; i < TILES; i++)
+	{
+		for (int j = 0; j < TILES; j++)
+		{
+			if (pieces[i][j].m_typeFun() == PieceType::KING && pieces[i][j].m_colorFun() == col)
+			{
+				or = i;
+				oc = j;
+				goto checkpoint;
+			}
+		}
+	}
+
+	checkpoint:
+
+	if (col == PieceColor::DARK)
+	{
+		if (((or +1 < 8 && pieces[or +1][oc].m_typeFun() == PieceType::KING) && (pieces[or +1][oc].m_colorFun() == PieceColor::LIGHT))
+			|| ((or -1 >= 0 && pieces[or -1][oc].m_typeFun() == PieceType::KING) && (pieces[or -1][oc].m_colorFun() == PieceColor::LIGHT))
+			|| ((oc + 1 < 8 && pieces[or ][oc + 1].m_typeFun() == PieceType::KING) && (pieces[or][oc+1].m_colorFun() == PieceColor::LIGHT))
+			|| ((oc - 1 >= 0 && pieces[or ][oc - 1].m_typeFun() == PieceType::KING) && (pieces[or][oc-1].m_colorFun() == PieceColor::LIGHT))
+			|| (((or +1 < 8 && oc + 1 < 8) && (pieces[or +1][oc + 1].m_typeFun() == PieceType::KING)) && (pieces[or +1][oc+1].m_colorFun() == PieceColor::LIGHT))
+			|| (((or +1 < 8 && oc - 1 >= 0) && (pieces[or +1][oc - 1].m_typeFun() == PieceType::KING)) && (pieces[or +1][oc-1].m_colorFun() == PieceColor::LIGHT))
+			|| (((or -1 >= 0 && oc + 1 < 8) && (pieces[or -1][oc + 1].m_typeFun() == PieceType::KING)) && (pieces[or -1][oc+1].m_colorFun() == PieceColor::LIGHT))
+			|| (((or -1 >= 0 && oc - 1 >= 0) && (pieces[or -1][oc - 1].m_typeFun() == PieceType::KING))) && (pieces[or -1][oc-1].m_colorFun() == PieceColor::LIGHT))
+		{
+			return true;
+		}
+		if ((or +1 < 8 && oc + 1 < 8) && (pieces[or +1][oc + 1].m_colorFun() == PieceColor::LIGHT && pieces[or +1][oc + 1].m_typeFun() == PieceType::PAWN))
+		{
+			return true;
+		}
+		if ((or +1 < 8 && oc - 1 >=0) && (pieces[or +1][oc - 1].m_colorFun() == PieceColor::LIGHT && pieces[or +1][oc - 1].m_typeFun() == PieceType::PAWN))
+		{
+			return true;
+		}
+		if (((or +2 < 8 && oc + 1 < 8) && (pieces[or +2][oc + 1].m_typeFun() == PieceType::KNIGHT && pieces[or +2][oc + 1].m_colorFun() == PieceColor::LIGHT))
+			|| ((or -2 >= 0 && oc + 1 < 8) && (pieces[or -2][oc + 1].m_typeFun() == PieceType::KNIGHT && pieces[or -2][oc + 1].m_colorFun() == PieceColor::LIGHT))
+			|| ((or +2 < 8 && oc - 1 >= 0) && (pieces[or +2][oc - 1].m_typeFun() == PieceType::KNIGHT && pieces[or +2][oc - 1].m_colorFun() == PieceColor::LIGHT))
+			|| ((or -2 >= 0 && oc - 1 >= 0) && (pieces[or -2][oc - 1].m_typeFun() == PieceType::KNIGHT && pieces[or -2][oc - 1].m_colorFun() == PieceColor::LIGHT))
+			|| ((or +1 < 8 && oc +2 < 8) && (pieces[or +1][oc + 2].m_typeFun() == PieceType::KNIGHT && pieces[or +1][oc + 2].m_colorFun() == PieceColor::LIGHT))
+			|| ((or +1 < 8 && oc - 2 >= 0) && (pieces[or +1][oc - 2].m_typeFun() == PieceType::KNIGHT && pieces[or +1][oc - 2].m_colorFun() == PieceColor::LIGHT))
+			|| ((or -1 >= 0 && oc + 2 < 8) && (pieces[or -1][oc + 2].m_typeFun() == PieceType::KNIGHT && pieces[or -1][oc + 2].m_colorFun() == PieceColor::LIGHT))
+			|| ((or -1 >= 0 && oc - 2 >= 0) && (pieces[or -1][oc - 2].m_typeFun() == PieceType::KNIGHT && pieces[or -1][oc - 2].m_colorFun() == PieceColor::LIGHT)))
+		{
+			return true;
+		}
+		int x = or -1;
+		int y = oc ;
+			while (x>=0)
+			{
+				if ((pieces[x][y].m_colorFun() == PieceColor::DARK) || (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() != PieceType::ROOK && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+				{
+					break;
+				}
+				else if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) && (pieces[x][y].m_typeFun() == PieceType::ROOK || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+				{
+					return true;
+				}
+				x--;
+			}
+	
+		x = or +1;
+		y = oc;
+		
+			while (x < 8)
+			{
+				if ((pieces[x][y].m_colorFun() == PieceColor::DARK) || (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() != PieceType::ROOK && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+				{
+					break;
+				}
+				else if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) && (pieces[x][y].m_typeFun() == PieceType::ROOK || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+				{
+					return true;
+				}
+				x++;
+			}
+		
+		x = or ;
+		y = oc -1;
+		
+			while (y >= 0)
+			{
+				if ((pieces[x][y].m_colorFun() == PieceColor::DARK) || (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() != PieceType::ROOK && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+				{
+					break;
+				}
+				else if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) && (pieces[x][y].m_typeFun() == PieceType::ROOK || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+				{
+					return true;
+				}
+				y--;
+			}
+		
+		x = or ;
+		y = oc +1;
+		
+			while (y < 8)
+			{
+				if ((pieces[x][y].m_colorFun() == PieceColor::DARK) || (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() != PieceType::ROOK && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+				{
+					break;
+				}
+				else if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) && (pieces[x][y].m_typeFun() == PieceType::ROOK || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+				{
+					return true;
+				}
+				y++;
+			}
+		
+
+		x = or -1;
+		y = oc +1;
+
+		while (x >= 0 && y < 8)
+		{
+			if ((pieces[x][y].m_colorFun() == PieceColor::DARK) || (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() != PieceType::BISHOP && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+			{
+				break;
+			}
+			else if (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() == PieceType::BISHOP || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+			{
+				return true;
+			}
+			x--;
+			y++;
+		}
+
+		x = or-1 ;
+		y = oc-1 ;
+
+		while (x >= 0 && y >= 0)
+		{
+			if ((pieces[x][y].m_colorFun() == PieceColor::DARK) || (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() != PieceType::BISHOP && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+			{
+				break;
+			}
+			else if (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() == PieceType::BISHOP || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+			{
+				return true;
+			}
+			x--;
+			y--;
+		}
+
+		x = or +1;
+		y = oc -1;
+
+		while (x < 8 && y >= 0)
+		{
+			if ((pieces[x][y].m_colorFun() == PieceColor::DARK) || (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() != PieceType::BISHOP && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+			{
+				break;
+			}
+			else if (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() == PieceType::BISHOP || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+			{
+				return true;
+			}
+			x++;
+			y--;
+		}
+
+		x = or+1 ;
+		y = oc+1 ;
+
+		while (x < 8 && y < 8)
+		{
+			if ((pieces[x][y].m_colorFun() == PieceColor::DARK) || (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() != PieceType::BISHOP && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+			{
+				break;
+			}
+			else if (pieces[x][y].m_colorFun() == PieceColor::LIGHT && (pieces[x][y].m_typeFun() == PieceType::BISHOP || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+			{
+				return true;
+			}
+			x++;
+			y++;
+		}
+		return false;
+	}		
+	else if (col == PieceColor::LIGHT)
+	{
+		if (((or +1 < 8 && pieces[or +1][oc].m_typeFun() == PieceType::KING) && (pieces[or +1][oc].m_colorFun() == PieceColor::DARK))
+			|| ((or -1 >= 0 && pieces[or -1][oc].m_typeFun() == PieceType::KING) && (pieces[or -1][oc].m_colorFun() == PieceColor::DARK))
+			|| ((oc + 1 < 8 && pieces[or ][oc + 1].m_typeFun() == PieceType::KING) && (pieces[or ][oc + 1].m_colorFun() == PieceColor::DARK)
+			|| ((oc - 1 >= 0 && pieces[or ][oc - 1].m_typeFun() == PieceType::KING) && (pieces[or ][oc - 1].m_colorFun() == PieceColor::DARK))
+			|| (((or +1 < 8 && oc + 1 < 8) && (pieces[or +1][oc + 1].m_typeFun() == PieceType::KING)) && (pieces[or +1][oc + 1].m_colorFun() == PieceColor::DARK))
+			|| (((or +1 < 8 && oc - 1 >= 0) && (pieces[or +1][oc - 1].m_typeFun() == PieceType::KING)) && (pieces[or +1][oc - 1].m_colorFun() == PieceColor::DARK))
+			|| (((or -1 >= 0 && oc + 1 < 8) && (pieces[or -1][oc + 1].m_typeFun() == PieceType::KING)) && (pieces[or -1][oc + 1].m_colorFun() == PieceColor::DARK))
+			|| (((or -1 >= 0 && oc - 1 >= 0) && (pieces[or -1][oc - 1].m_typeFun() == PieceType::KING))) && (pieces[or -1][oc - 1].m_colorFun() == PieceColor::DARK)))
+		{
+			return true;
+		}
+		if ((or -1 >= 0 && oc + 1 < 8) && (pieces[or -1][oc + 1].m_colorFun() == PieceColor::DARK && pieces[or -1][oc + 1].m_typeFun() == PieceType::PAWN))
+		{
+			return true;
+		}
+		if ((or -1 >= 0 && oc - 1 >= 0) && (pieces[or -1][oc - 1].m_colorFun() == PieceColor::DARK && pieces[or -1][oc - 1].m_typeFun() == PieceType::PAWN))
+		{
+			return true;
+		}
+		if (((or +2 < 8 && oc + 1 < 8) && (pieces[or +2][oc + 1].m_typeFun() == PieceType::KNIGHT && pieces[or +2][oc + 1].m_colorFun() == PieceColor::DARK))
+			|| ((or -2 >= 0 && oc + 1 < 8) && (pieces[or -2][oc + 1].m_typeFun() == PieceType::KNIGHT && pieces[or -2][oc + 1].m_colorFun() == PieceColor::DARK))
+			|| ((or +2 < 8 && oc - 1 >= 0) && (pieces[or +2][oc - 1].m_typeFun() == PieceType::KNIGHT && pieces[or +2][oc - 1].m_colorFun() == PieceColor::DARK))
+			|| ((or -2 >= 0 && oc - 1 >= 0) && (pieces[or -2][oc - 1].m_typeFun() == PieceType::KNIGHT && pieces[or -2][oc - 1].m_colorFun() == PieceColor::DARK))
+			|| ((or +1 < 8 && oc + 2 < 8) && (pieces[or +1][oc + 2].m_typeFun() == PieceType::KNIGHT && pieces[or +1][oc + 2].m_colorFun() == PieceColor::DARK))
+			|| ((or +1 < 8 && oc - 2 >= 0) && (pieces[or +1][oc - 2].m_typeFun() == PieceType::KNIGHT && pieces[or +1][oc - 2].m_colorFun() == PieceColor::DARK))
+			|| ((or -1 >= 0 && oc + 2 < 8) && (pieces[or -1][oc + 2].m_typeFun() == PieceType::KNIGHT && pieces[or -1][oc + 2].m_colorFun() == PieceColor::DARK))
+			|| ((or -1 >= 0 && oc - 2 >= 0) && (pieces[or -1][oc - 2].m_typeFun() == PieceType::KNIGHT && pieces[or -1][oc - 2].m_colorFun() == PieceColor::DARK)))
+		{
+			return true;
+		}
+		int x = or-1;
+		int y = oc;
+		if (x != 0)
+		{
+			while (x >= 0)
+			{
+				if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) || (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() != PieceType::ROOK && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+				{
+					break;
+				}
+				else if ((pieces[x][y].m_colorFun() == PieceColor::DARK) && (pieces[x][y].m_typeFun() == PieceType::ROOK || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+				{
+					return true;
+				}
+				x--;
+			}
+		}
+		x = or +1;
+		y = oc;
+		if (x != 7)
+		{
+			while (x < 8)
+			{
+				if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) || (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() != PieceType::ROOK && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+				{
+					break;
+				}
+				else if ((pieces[x][y].m_colorFun() == PieceColor::DARK) && (pieces[x][y].m_typeFun() == PieceType::ROOK || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+				{
+					return true;
+				}
+				x++;
+			}
+		}
+		x = or ;
+		y = oc-1;
+		if (y != 0)
+		{
+			while (y >= 0)
+			{
+				if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) || (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() != PieceType::ROOK && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+				{
+					break;
+				}
+				else if ((pieces[x][y].m_colorFun() == PieceColor::DARK) && (pieces[x][y].m_typeFun() == PieceType::ROOK || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+				{
+					return true;
+				}
+				y--;
+			}
+		}
+		x = or ;
+		y = oc+1;
+		if (y != 7)
+		{
+			while (y < 8)
+			{
+				if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) || (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() != PieceType::ROOK && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+				{
+					break;
+				}
+				else if ((pieces[x][y].m_colorFun() == PieceColor::DARK) && (pieces[x][y].m_typeFun() == PieceType::ROOK || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+				{
+					return true;
+				}
+				y++;
+			}
+		}
+
+		x = or -1;
+		y = oc+1;
+
+		while (x >= 0 && y < 8)
+		{
+			if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) || (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() != PieceType::BISHOP && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+			{
+				break;
+			}
+			else if (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() == PieceType::BISHOP || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+			{
+				return true;
+			}
+			x--;
+			y++;
+		}
+
+		x = or -1;
+		y = oc-1;
+
+		while (x >= 0 && y >= 0)
+		{
+			if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) || (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() != PieceType::BISHOP && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+			{
+				break;
+			}
+			else if (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() == PieceType::BISHOP || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+			{
+				return true;
+			}
+			x--;
+			y--;
+		}
+
+		x = or +1;
+		y = oc-1;
+
+		while (x < 8 && y >= 0)
+		{
+			if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) || (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() != PieceType::BISHOP && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+			{
+				break;
+			}
+			else if (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() == PieceType::BISHOP || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+			{
+				return true;
+			}
+			x++;
+			y--;
+		}
+
+		x = or +1;
+		y = oc+1;
+
+		while (x < 8 && y < 8)
+		{
+			if ((pieces[x][y].m_colorFun() == PieceColor::LIGHT) || (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() != PieceType::BISHOP && pieces[x][y].m_typeFun() != PieceType::QUEEN)))
+			{
+				break;
+			}
+			else if (pieces[x][y].m_colorFun() == PieceColor::DARK && (pieces[x][y].m_typeFun() == PieceType::BISHOP || pieces[x][y].m_typeFun() == PieceType::QUEEN))
+			{
+				return true;
+			}
+			x++;
+			y++;
+		}
+		return false;
+	}
+	else
+	{
+		return false;
+	}
+}
+
