@@ -56,6 +56,32 @@ bool Game::checkMouseCoord2(Board& board)
 	}
 }
 
+bool Game::checkMouseCoord3(Board& board)
+{
+	Vector2 mouse2 = GetMousePosition();
+	if (CheckCollisionPointRec(mouse2, { 350,200,100,400 }))
+	{
+		int tc = (int)mouse2.x/100;
+		int tr = (int)mouse2.y/100;
+		
+		if(tr==2 || tr==3 || tr==4 || tr==5)
+		{
+			pr = tr-2;
+			pc = tc;
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
 
 
 void Game::initialize()
@@ -100,20 +126,34 @@ void Game::initialize()
 							capturedPiece = Piece(board.pieceType(r, c), board.pieceColor(r, c), board.pieceTex(r, c), false);
 						}
 						board.updatePiecePosition(nr, nc, r, c);
+
+						
 						if (!board.checkForCheck(currentTurn))
 						{
-							if (currentTurn == PieceColor::LIGHT)
+							if (board.promoteFlagCheck())
 							{
-								currentTurn = PieceColor::DARK;
+								currentState = STATE::PAWN_PROMOTION;
 							}
 							else
 							{
-								currentTurn = PieceColor::LIGHT;
-							}
-							currentState = STATE::SELECT_PIECE;
+								if (currentTurn == PieceColor::LIGHT)
+								{
+									currentTurn = PieceColor::DARK;
+									currentState = STATE::SELECT_PIECE;
+								}
+								else
+								{
+									currentTurn = PieceColor::LIGHT;
+									currentState = STATE::SELECT_PIECE;
+								}
+							}			
 						}
 						else
 						{
+							if (board.checkForCheckMate(currentTurn))
+							{
+								goto endgame;
+							}
 							if (capturedPiece.isAliveFun())
 							{
 								board.updatePiecePosition(r, c, nr, nc);
@@ -138,8 +178,30 @@ void Game::initialize()
 				}
 			}
 		}
+		else if (currentState == STATE::PAWN_PROMOTION)
+		{
+			board.promote(r, c, currentTurn);
+			if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+			{
+				if (checkMouseCoord3(board) == true)
+				{
+					board.updatePiecePosition2(nr, nc, pr, currentTurn);
+					if (currentTurn == PieceColor::DARK)
+					{
+						currentTurn = PieceColor::LIGHT;
+					}
+					else if(currentTurn == PieceColor::LIGHT)
+					{
+						currentTurn = PieceColor::DARK;
+					}
+					currentState = STATE::SELECT_PIECE;
+					board.clearPromoteFlag();
+				}
+			}
+		}
 		EndDrawing();
 	}
+	endgame:
 	CloseWindow();
 }
 

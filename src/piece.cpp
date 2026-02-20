@@ -14,7 +14,7 @@ Piece::Piece(PieceType type, PieceColor color, Texture2D tex, bool isAlive)
 {
 }
 
-void Piece::drawPiece(int r, int c)
+void Piece::drawPiece(float r, float c)
 {
 	Rectangle source = {
 		0.0f,
@@ -34,6 +34,8 @@ void Piece::drawPiece(int r, int c)
 
 	DrawTexturePro(m_tex, source, dest, origin, 0.0f, WHITE);
 }
+
+
 
 bool Piece::isAliveFun() const
 {

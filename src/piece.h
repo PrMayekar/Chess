@@ -15,7 +15,7 @@ protected:
 public:
 	Piece();
 	Piece(PieceType type, PieceColor color, Texture2D tex, bool isAlive);
-	void drawPiece(int r, int c);
+	void drawPiece(float r, float c);
 	bool isAliveFun() const;
 	Texture2D m_texFun() const;
 	PieceType m_typeFun() const;

@@ -1,5 +1,23 @@
 #include "board.h"
 
+void Board::promote(int r, int c, PieceColor col)
+{
+	int x = 2;
+	for (int i = 0; i < 4; i++)
+	{
+		promotionTiles[i].drawTile();
+		if (col == PieceColor::DARK)
+		{
+			darkPromotion[i].drawPiece(x, 3.5);
+		}
+		else if (col == PieceColor::LIGHT)
+		{
+			lightPromotion[i].drawPiece(x,3.5);
+		}
+		x += 1;
+	}
+}
+
 Board::Board()
 {
 	for (int i = 0; i < TILES; i++)
@@ -13,6 +31,12 @@ Board::Board()
 			pieces[i][j] = Piece();
 		}
 	}
+
+	promotionTiles[0] = Tile({ 350,200,100,100 }, Color{ 255, 255, 255, 100 });
+	promotionTiles[1] = Tile({ 350,300,100,100 }, Color{ 255, 255, 255, 150 });
+	promotionTiles[2] = Tile({ 350,400,100,100 }, Color{ 255, 255, 255, 100 });
+	promotionTiles[3] = Tile({ 350,500,100,100 }, Color{ 255, 255, 255, 150 });
+
 
 	Texture2D darkPawn = LoadTexture("assets/Chess_pdt60.png");
 	Texture2D lightPawn = LoadTexture("assets/Chess_plt60.png");
@@ -32,13 +56,13 @@ Board::Board()
 
 
 	lightPromotion[0] = Piece(PieceType::ROOK, PieceColor::LIGHT, lightRook, true);
-	lightPromotion[1] = Piece(PieceType::KNIGHT, PieceColor::LIGHT, lightBishop, true);
-	lightPromotion[2] = Piece(PieceType::BISHOP, PieceColor::LIGHT, lightKnight, true);
+	lightPromotion[1] = Piece(PieceType::KNIGHT, PieceColor::LIGHT, lightKnight, true);
+	lightPromotion[2] = Piece(PieceType::BISHOP, PieceColor::LIGHT, lightBishop, true);
 	lightPromotion[3] = Piece(PieceType::QUEEN, PieceColor::LIGHT, lightQueen, true);
 
 	darkPromotion[0] = Piece(PieceType::ROOK, PieceColor::DARK, darkRook, true);
-	darkPromotion[1] = Piece(PieceType::KNIGHT, PieceColor::DARK, darkBishop, true);
-	darkPromotion[2] = Piece(PieceType::BISHOP, PieceColor::DARK, darkKnight, true);
+	darkPromotion[1] = Piece(PieceType::KNIGHT, PieceColor::DARK, darkKnight, true);
+	darkPromotion[2] = Piece(PieceType::BISHOP, PieceColor::DARK, darkBishop, true);
 	darkPromotion[3] = Piece(PieceType::QUEEN, PieceColor::DARK, darkQueen, true);
 
 	for (int i = 0; i < TILES; i++)
@@ -138,6 +162,18 @@ void Board::updatePiecePosition(int r, int c, int or, int oc)
 {
 	pieces[r][c] = pieces[or][oc];
 	pieces[or][oc] = Piece();
+}
+
+void Board::updatePiecePosition2(int r, int c, int nr, PieceColor col)
+{
+	if (col == PieceColor::DARK)
+	{
+		pieces[r][c] = darkPromotion[nr];
+	}
+	else if (col == PieceColor::LIGHT)
+	{
+		pieces[r][c] = lightPromotion[nr];
+	}
 }
 
 void Board::addNewPiece(int r, int c, Piece piece)
@@ -308,6 +344,10 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 			{
 				if (((r==or-1) || ((pieces[or -1][oc].isAliveFun() == false) && ((or==6) && (r==or-2)))) && (pieces[r][c].isAliveFun() == false))
 				{
+					if (r == 0)
+					{
+						promoteFlag = true;
+					}
 					return true;
 				}	
 				else
@@ -318,9 +358,17 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 			else
 			{
 				if (((r==or+1) || ((pieces[or +1][oc].isAliveFun() == false) && ((or == 1) && (r==or+2)))) && (pieces[r][c].isAliveFun() == false))
+				{
+					if (r == 7)
+					{
+						promoteFlag = true;
+					}
 					return true;
+				}
 				else
+				{
 					return false;
+				}
 			}
 		}
 		else
@@ -331,6 +379,10 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 				{
 					if ((r < or ) && ((pieces[r][c].isAliveFun() == true) && (pieces[r][c].m_colorFun() == PieceColor::DARK)))
 					{
+						if (r == 0)
+						{
+							promoteFlag = true;
+						}
 						return true;
 					}
 					else
@@ -342,6 +394,10 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 				{
 					if ((r > or ) && ((pieces[r][c].isAliveFun() == true) && (pieces[r][c].m_colorFun() == PieceColor::LIGHT)))
 					{
+						if (r == 7)
+						{
+							promoteFlag = true;
+						}
 						return true;
 					}
 					else
@@ -375,8 +431,8 @@ bool Board::checkForCheck(PieceColor col)
 	{
 		oppositeColor = PieceColor::DARK;
 	}
-	int or ;
-	int oc ; 
+	int or =-1;
+	int oc =-1; 
 	for (int i = 0; i < TILES; i++)
 	{
 		for (int j = 0; j < TILES; j++)
@@ -733,3 +789,132 @@ bool Board::checkForCheck(PieceColor col)
 	}
 }
 
+bool Board::promoteFlagCheck()
+{
+	if (promoteFlag == true)
+		return true;
+	else
+		return false;
+}
+
+void Board::setPromoteFlag()
+{
+	promoteFlag = true;
+}
+
+void Board::clearPromoteFlag()
+{
+	promoteFlag = false;
+}
+
+bool Board::checkForCheckMate(PieceColor col)
+{
+	
+	PieceColor opponent;
+	int or = -1;
+	int oc = -1;
+	if (col == PieceColor::DARK)
+	{
+		opponent = PieceColor::LIGHT;
+	}
+	else
+	{
+		opponent = PieceColor::DARK;
+	}
+	
+	for (int i = 0; i < TILES; i++)
+	{
+		for (int j = 0; j < TILES; j++)
+		{
+			if (pieces[i][j].m_typeFun() == PieceType::KING && pieces[i][j].m_colorFun() == col)
+			{
+				or = i;
+				oc = j;
+			}
+		}
+	}
+
+	int i = or ;
+	int j = oc ;
+
+	if ((i + 1 < 8) && (pieces[i + 1][j].isAliveFun() == false))
+	{
+		updatePiecePosition(i + 1, oc, or , oc);
+		if (!checkForCheck(col))
+		{
+			updatePiecePosition(or , oc, i + 1, oc);
+			return false;
+		}
+	}
+
+	if ((j + 1 < 8) && (pieces[i][j+1].isAliveFun() == false))
+	{
+		updatePiecePosition(or, j+1, or , oc);
+		if (!checkForCheck(col))
+		{
+			updatePiecePosition(or , oc, or, j+1);
+			return false;
+		}
+	}
+
+	if ((i - 1 >= 0) && (pieces[i - 1][j].isAliveFun() == false))
+	{
+		updatePiecePosition(i - 1, oc, or , oc);
+		if (!checkForCheck(col))
+		{
+			updatePiecePosition(or , oc, i - 1, oc);
+			return false;
+		}
+	}
+
+	if ((j - 1 >= 0) && (pieces[i][j - 1].isAliveFun() == false))
+	{
+		updatePiecePosition(or , j - 1, or , oc);
+		if (!checkForCheck(col))
+		{
+			updatePiecePosition(or , oc, or , j - 1);
+			return false;
+		}
+	}
+
+	if (((i + 1 < 8) && (j+1<8)) && (pieces[i+1][j + 1].isAliveFun() == false))
+	{
+		updatePiecePosition(i+1 , j + 1, or , oc);
+		if (!checkForCheck(col))
+		{
+			updatePiecePosition(or , oc, i+1 , j + 1);
+			return false;
+		}
+	}
+
+	if (((i + 1 < 8) && (j - 1 >= 0)) && (pieces[i + 1][j - 1].isAliveFun() == false))
+	{
+		updatePiecePosition(i + 1, j - 1, or , oc);
+		if (!checkForCheck(col))
+		{
+			updatePiecePosition(or , oc, i + 1, j - 1);
+			return false;
+		}
+	}
+
+	if (((i - 1 >= 0) && (j + 1 < 8)) && (pieces[i - 1][j + 1].isAliveFun() == false))
+	{
+		updatePiecePosition(i - 1, j + 1, or , oc);
+		if (!checkForCheck(col))
+		{
+			updatePiecePosition(or , oc, i - 1, j + 1);
+			return false;
+		}
+	}
+
+	if (((i - 1 >= 0) && (j - 1 >= 0)) && (pieces[i - 1][j - 1].isAliveFun() == false))
+	{
+		updatePiecePosition(i - 1, j - 1, or , oc);
+		if (!checkForCheck(col))
+		{
+			updatePiecePosition(or , oc, i - 1, j - 1);
+			return false;
+		}
+	}
+	return true;
+}

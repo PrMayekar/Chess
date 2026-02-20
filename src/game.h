@@ -14,14 +14,18 @@ protected:
 	int c;
 	int nr;
 	int nc;
+	int pr;
+	int pc;
 	bool nextFlag = false;
 	Piece selectPiece;
 	Piece capturedPiece;
 	PieceColor currentTurn;
 	bool check = false;
+	bool choosePromotion = false;
 
 public:
 	Game();
+	bool checkMouseCoord3(Board& board);
 	bool checkMouseCoord2(Board& board);
 	bool checkMouseCoord(Board& board);
 	void initialize();
