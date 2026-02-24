@@ -20,6 +20,7 @@ protected:
 	Piece selectPiece;
 	Piece capturedPiece;
 	PieceColor currentTurn;
+	PieceColor opp;
 	bool check = false;
 	bool choosePromotion = false;
 

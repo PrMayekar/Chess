@@ -30,10 +30,12 @@ public:
 	void updatePiecePosition2(int r, int c, int nr, PieceColor col);
 	bool validateNewPosition(int r, int c, int or , int oc);
 	bool checkForCheck(PieceColor col);
-	bool checkChecker(Piece p,int or,int oc,int i, int j);
+	bool checkChecker(Piece p,int or,int oc,int i, int j, PieceColor opp);
 	void promote(int r, int c, PieceColor col);
 	bool promoteFlagCheck();
 	void setPromoteFlag();
 	void clearPromoteFlag();
 	bool checkForCheckMate(PieceColor col);
+	bool checkForStaleMate(PieceColor col);
+	bool staleChecker(int pr, int pc, Piece p);
 };

@@ -100,12 +100,25 @@ void Game::initialize()
 		board.drawBoard();
 		board.drawPieces();
 
+		if (currentTurn == PieceColor::DARK)
+		{
+			opp = PieceColor::LIGHT;
+		}
+		else
+		{
+			opp = PieceColor::DARK;
+		}
+
 		if (currentState == STATE::SELECT_PIECE) {
 			if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 			{
 				if (checkMouseCoord(board)==true)
 				{
 					currentState = STATE::SELECT_DESTINATION;
+				}
+				else
+				{
+					currentState = STATE::SELECT_PIECE;
 				}
 			}
 		}
@@ -127,45 +140,55 @@ void Game::initialize()
 						}
 						board.updatePiecePosition(nr, nc, r, c);
 
-						
-						if (!board.checkForCheck(currentTurn))
+						if (board.checkForCheck(currentTurn))
 						{
-							if (board.promoteFlagCheck())
+							board.updatePiecePosition(r, c, nr, nc);
+							if (capturedPiece.isAliveFun())
 							{
-								currentState = STATE::PAWN_PROMOTION;
+								board.addNewPiece(nr, nc, capturedPiece);
 							}
-							else
-							{
-								if (currentTurn == PieceColor::LIGHT)
-								{
-									currentTurn = PieceColor::DARK;
-									currentState = STATE::SELECT_PIECE;
-								}
-								else
-								{
-									currentTurn = PieceColor::LIGHT;
-									currentState = STATE::SELECT_PIECE;
-								}
-							}			
+							currentState = STATE::SELECT_PIECE;
+							continue;
+						}
+
+						if (board.checkForCheck(opp))
+						{
+							check = true;
 						}
 						else
 						{
-							if (board.checkForCheckMate(currentTurn))
-							{
-								goto endgame;
-							}
-							if (capturedPiece.isAliveFun())
-							{
-								board.updatePiecePosition(r, c, nr, nc);
-								board.addNewPiece(nr, nc, capturedPiece);
-								capturedPiece = Piece(board.pieceType(nr, nc), board.pieceColor(nr, nc), board.pieceTex(nr, nc), false);
-							}
-							else
-							{
-								board.updatePiecePosition(r, c, nr, nc);
-							}
-							currentState = STATE::SELECT_PIECE;
+							check = false;
 						}
+
+						// Function call to check stalemate - (Incomplete)
+						/*if (!check)
+						{
+							if (board.checkForStaleMate(opp))
+							{
+								currentState = STATE::GAME_OVER;
+								continue;
+							}
+						}*/
+
+						if (check == true)
+						{
+							if (board.checkForCheckMate(opp))
+							{
+								currentState = STATE::GAME_OVER;
+								continue;
+							}
+						}
+
+						if (board.promoteFlagCheck())
+						{
+							currentState = STATE::PAWN_PROMOTION;
+							continue;
+						}
+
+
+						currentTurn = opp;
+						currentState = STATE::SELECT_PIECE;
+
 					}
 					else
 					{
@@ -198,6 +221,21 @@ void Game::initialize()
 					board.clearPromoteFlag();
 				}
 			}
+		}
+		else if (currentState == STATE::GAME_OVER)
+		{
+			if (currentTurn == PieceColor::DARK)
+			{
+				DrawRectangle(150, 300, 500, 100, Color{ 255, 255, 255, 150 });
+				DrawText("Black Won", 150, 300, 100, BLACK);
+			}
+			else
+			{
+				DrawRectangle(150, 300, 500, 100, Color{ 0, 0, 0, 150 });
+				DrawText("White Won", 150, 300, 100, WHITE);
+			}
+			
+			currentState = STATE::GAME_OVER;
 		}
 		EndDrawing();
 	}
