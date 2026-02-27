@@ -38,4 +38,7 @@ public:
 	bool checkForCheckMate(PieceColor col);
 	bool checkForStaleMate(PieceColor col);
 	bool staleChecker(int pr, int pc, Piece p);
+	void highlightTile(int i, int j);
+	void unHightlightTile(int j, int i);
+	Vector2 findKingPosition(PieceColor col);
 };

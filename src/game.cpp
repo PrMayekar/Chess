@@ -90,6 +90,9 @@ void Game::initialize()
 	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(800, 800, "Chess");
 
+	int kingX = -1;
+	int kingY = -1;
+
 	Board board;
 	currentTurn = PieceColor::LIGHT;
 
@@ -115,6 +118,7 @@ void Game::initialize()
 				if (checkMouseCoord(board)==true)
 				{
 					currentState = STATE::SELECT_DESTINATION;
+					board.highlightTile(r, c);
 				}
 				else
 				{
@@ -185,6 +189,7 @@ void Game::initialize()
 							continue;
 						}
 
+						board.unHightlightTile(r, c);
 
 						currentTurn = opp;
 						currentState = STATE::SELECT_PIECE;
@@ -192,11 +197,13 @@ void Game::initialize()
 					}
 					else
 					{
+						board.unHightlightTile(r, c);
 						currentState = STATE::SELECT_PIECE;
 					}
 				}
 				else
 				{
+					board.unHightlightTile(r, c);
 					currentState = STATE::SELECT_PIECE;
 				}
 			}

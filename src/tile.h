@@ -13,4 +13,5 @@ public:
 	Tile();
 	Tile(Rectangle tileCoordinates, Color tileColor);
 	void drawTile();
+	void hightlightSelectedPiece(int i, int j);
 };
