@@ -18,6 +18,7 @@ void Board::promote(int r, int c, PieceColor col)
 	}
 }
 
+
 void Board::highlightTile(int j, int i)
 {
 	Rectangle rec = { (float)i * TILESIZE, (float)j * TILESIZE, TILESIZE, TILESIZE };
@@ -1722,73 +1723,307 @@ bool Board::checkForStaleMate(PieceColor col)
 
 bool Board::staleChecker(int pr, int pc, Piece p)  // returns true if player has atleast one possible move, else false
 {
-	PieceColor opp;
-	if (p.m_colorFun() == PieceColor::DARK)
+	Piece capturedPiece = Piece();
+	PieceColor opp = PieceColor::NONE;
+	PieceColor col = p.m_colorFun();
+	if (col == PieceColor::DARK)
 	{
 		opp = PieceColor::LIGHT;
 	}
-	else if (p.m_colorFun() == PieceColor::LIGHT)
+	else if (col == PieceColor::LIGHT)
 	{
 		opp = PieceColor::DARK;
 	}
 
 	if (p.m_typeFun() == PieceType::ROOK || p.m_typeFun() == PieceType::QUEEN)
 	{
-		if (pr + 1 < 8 && (pieces[pr + 1][pc].isAliveFun() == false || pieces[pr+1][pc].m_colorFun() == opp))
+		// downward
+		for (int x = pr + 1; x < 8; x++)
 		{
-			return true;
+			if (pieces[x][pc].isAliveFun() && pieces[x][pc].m_colorFun() == col) break;
+			if (pieces[x][pc].m_colorFun() == opp) capturedPiece = pieces[x][pc];
+			updatePiecePosition(x, pc, pr, pc);
+			if (!checkForCheck(col))
+			{
+				updatePiecePosition(pr, pc, x, pc);
+				if (capturedPiece.isAliveFun()) { addNewPiece(x, pc, capturedPiece); capturedPiece = Piece(); }
+				return true;
+			}
+			updatePiecePosition(pr, pc, x, pc);
+			if (capturedPiece.isAliveFun()) { addNewPiece(x, pc, capturedPiece); capturedPiece = Piece(); break; }
+			capturedPiece = Piece();
 		}
-
-		if (pr - 1 >= 0 && (pieces[pr - 1][pc].isAliveFun() == false || pieces[pr - 1][pc].m_colorFun() == opp))
+		// upward
+		for (int x = pr - 1; x >= 0; x--)
 		{
-			return true;
+			if (pieces[x][pc].isAliveFun() && pieces[x][pc].m_colorFun() == col) break;
+			if (pieces[x][pc].m_colorFun() == opp) capturedPiece = pieces[x][pc];
+			updatePiecePosition(x, pc, pr, pc);
+			if (!checkForCheck(col))
+			{
+				updatePiecePosition(pr, pc, x, pc);
+				if (capturedPiece.isAliveFun()) { addNewPiece(x, pc, capturedPiece); capturedPiece = Piece(); }
+				return true;
+			}
+			updatePiecePosition(pr, pc, x, pc);
+			if (capturedPiece.isAliveFun()) { addNewPiece(x, pc, capturedPiece); capturedPiece = Piece(); break; }
+			capturedPiece = Piece();
 		}
-
-		if (pc + 1 < 8 && (pieces[pr][pc + 1].isAliveFun() == false || pieces[pr][pc + 1].m_colorFun() == opp))
+		// rightward
+		for (int y = pc + 1; y < 8; y++)
 		{
-			return true;
+			if (pieces[pr][y].isAliveFun() && pieces[pr][y].m_colorFun() == col) break;
+			if (pieces[pr][y].m_colorFun() == opp) capturedPiece = pieces[pr][y];
+			updatePiecePosition(pr, y, pr, pc);
+			if (!checkForCheck(col))
+			{
+				updatePiecePosition(pr, pc, pr, y);
+				if (capturedPiece.isAliveFun()) { addNewPiece(pr, y, capturedPiece); capturedPiece = Piece(); }
+				return true;
+			}
+			updatePiecePosition(pr, pc, pr, y);
+			if (capturedPiece.isAliveFun()) { addNewPiece(pr, y, capturedPiece); capturedPiece = Piece(); break; }
+			capturedPiece = Piece();
 		}
-
-		if (pc - 1 >= 0 && (pieces[pr][pc - 1].isAliveFun() == false || pieces[pr][pc - 1].m_colorFun() == opp))
+		// leftward
+		for (int y = pc - 1; y >= 0; y--)
 		{
-			return true;
+			if (pieces[pr][y].isAliveFun() && pieces[pr][y].m_colorFun() == col) break;
+			if (pieces[pr][y].m_colorFun() == opp) capturedPiece = pieces[pr][y];
+			updatePiecePosition(pr, y, pr, pc);
+			if (!checkForCheck(col))
+			{
+				updatePiecePosition(pr, pc, pr, y);
+				if (capturedPiece.isAliveFun()) { addNewPiece(pr, y, capturedPiece); capturedPiece = Piece(); }
+				return true;
+			}
+			updatePiecePosition(pr, pc, pr, y);
+			if (capturedPiece.isAliveFun()) { addNewPiece(pr, y, capturedPiece); capturedPiece = Piece(); break; }
+			capturedPiece = Piece();
 		}
 	}
 
 	if (p.m_typeFun() == PieceType::BISHOP || p.m_typeFun() == PieceType::QUEEN)
 	{
-		if ((pr + 1 < 8 && pc + 1 < 8) && (pieces[pr + 1][pc + 1].isAliveFun() == false || pieces[pr + 1][pc + 1].m_colorFun() == opp))
+		// down-right
+		for (int x = pr + 1, y = pc + 1; x < 8 && y < 8; x++, y++)
 		{
-			return true;
+			if (pieces[x][y].isAliveFun() && pieces[x][y].m_colorFun() == col) break;
+			if (pieces[x][y].m_colorFun() == opp) capturedPiece = pieces[x][y];
+			updatePiecePosition(x, y, pr, pc);
+			if (!checkForCheck(col))
+			{
+				updatePiecePosition(pr, pc, x, y);
+				if (capturedPiece.isAliveFun()) { addNewPiece(x, y, capturedPiece); capturedPiece = Piece(); }
+				return true;
+			}
+			updatePiecePosition(pr, pc, x, y);
+			if (capturedPiece.isAliveFun()) { addNewPiece(x, y, capturedPiece); capturedPiece = Piece(); break; }
+			capturedPiece = Piece();
 		}
-
-		if ((pr + 1 < 8 && pc - 1 >= 0) && (pieces[pr + 1][pc - 1].isAliveFun() == false || pieces[pr + 1][pc - 1].m_colorFun() == opp))
+		// down-left
+		for (int x = pr + 1, y = pc - 1; x < 8 && y >= 0; x++, y--)
 		{
-			return true;
+			if (pieces[x][y].isAliveFun() && pieces[x][y].m_colorFun() == col) break;
+			if (pieces[x][y].m_colorFun() == opp) capturedPiece = pieces[x][y];
+			updatePiecePosition(x, y, pr, pc);
+			if (!checkForCheck(col))
+			{
+				updatePiecePosition(pr, pc, x, y);
+				if (capturedPiece.isAliveFun()) { addNewPiece(x, y, capturedPiece); capturedPiece = Piece(); }
+				return true;
+			}
+			updatePiecePosition(pr, pc, x, y);
+			if (capturedPiece.isAliveFun()) { addNewPiece(x, y, capturedPiece); capturedPiece = Piece(); break; }
+			capturedPiece = Piece();
 		}
-
-		if ((pr - 1 >= 0 && pc + 1 < 8) && (pieces[pr - 1][pc + 1].isAliveFun() == false || pieces[pr - 1][pc + 1].m_colorFun() == opp))
+		// up-right
+		for (int x = pr - 1, y = pc + 1; x >= 0 && y < 8; x--, y++)
 		{
-			return true;
+			if (pieces[x][y].isAliveFun() && pieces[x][y].m_colorFun() == col) break;
+			if (pieces[x][y].m_colorFun() == opp) capturedPiece = pieces[x][y];
+			updatePiecePosition(x, y, pr, pc);
+			if (!checkForCheck(col))
+			{
+				updatePiecePosition(pr, pc, x, y);
+				if (capturedPiece.isAliveFun()) { addNewPiece(x, y, capturedPiece); capturedPiece = Piece(); }
+				return true;
+			}
+			updatePiecePosition(pr, pc, x, y);
+			if (capturedPiece.isAliveFun()) { addNewPiece(x, y, capturedPiece); capturedPiece = Piece(); break; }
+			capturedPiece = Piece();
 		}
-
-		if ((pr - 1 >= 0 && pc - 1 >= 0) && (pieces[pr - 1][pc - 1].isAliveFun() == false || pieces[pr - 1][pc - 1].m_colorFun() == opp))
+		// up-left
+		for (int x = pr - 1, y = pc - 1; x >= 0 && y >= 0; x--, y--)
 		{
-			return true;
+			if (pieces[x][y].isAliveFun() && pieces[x][y].m_colorFun() == col) break;
+			if (pieces[x][y].m_colorFun() == opp) capturedPiece = pieces[x][y];
+			updatePiecePosition(x, y, pr, pc);
+			if (!checkForCheck(col))
+			{
+				updatePiecePosition(pr, pc, x, y);
+				if (capturedPiece.isAliveFun()) { addNewPiece(x, y, capturedPiece); capturedPiece = Piece(); }
+				return true;
+			}
+			updatePiecePosition(pr, pc, x, y);
+			if (capturedPiece.isAliveFun()) { addNewPiece(x, y, capturedPiece); capturedPiece = Piece(); break; }
+			capturedPiece = Piece();
 		}
 	}
 
 	if (p.m_typeFun() == PieceType::KNIGHT)
 	{
-		if (((pr + 2 < 8 && pc + 1 < 8) && (pieces[pr + 2][pc + 1].isAliveFun() == false || pieces[pr + 2][pc + 1].m_colorFun() == opp))
-			|| ((pr -2 >= 0 && pc + 1 < 8) && (pieces[pr -2][pc + 1].isAliveFun() == false || pieces[pr -2][pc + 1].m_colorFun() == opp))
-			|| ((pr +2 < 8 && pc - 1 >= 0) && (pieces[pr +2][pc - 1].isAliveFun() == false || pieces[pr +2][pc - 1].m_colorFun() == opp))
-			|| ((pr -2 >= 0 && pc - 1 >= 0) && (pieces[pr -2][pc - 1].isAliveFun() == false || pieces[pr -2][pc - 1].m_colorFun() == opp))
-			|| ((pr +1 < 8 && pc + 2 < 8) && (pieces[pr +1][pc + 2].isAliveFun() == false || pieces[pr +1][pc + 2].m_colorFun() == opp))
-			|| ((pr -1 >= 0 && pc + 2 < 8) && (pieces[pr -1][pc + 2].isAliveFun() == false || pieces[pr -1][pc + 2].m_colorFun() == opp))
-			|| ((pr -1 >= 0 && pc - 2 >= 0) && (pieces[pr -1][pc - 2].isAliveFun() == false || pieces[pr -1][pc - 2].m_colorFun() == opp)))
+		if (pr + 2 < 8 && pc + 1 < 8)
 		{
-			return true;
+			if (pieces[pr + 2][pc + 1].isAliveFun() == false || pieces[pr + 2][pc + 1].m_colorFun() == opp)
+			{
+				if (pieces[pr + 2][pc + 1].m_colorFun() == opp) capturedPiece = pieces[pr + 2][pc + 1];
+				updatePiecePosition(pr + 2, pc + 1, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr + 2, pc + 1);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr + 2, pc + 1, capturedPiece); capturedPiece = Piece(); }
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr + 2, pc + 1);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr + 2, pc + 1, capturedPiece); capturedPiece = Piece(); }
+				}
+			}
+		}
+		if (pr - 2 >= 0 && pc + 1 < 8)
+		{
+			if (pieces[pr - 2][pc + 1].isAliveFun() == false || pieces[pr - 2][pc + 1].m_colorFun() == opp)
+			{
+				if (pieces[pr - 2][pc + 1].m_colorFun() == opp) capturedPiece = pieces[pr - 2][pc + 1];
+				updatePiecePosition(pr - 2, pc + 1, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr - 2, pc + 1);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr - 2, pc + 1, capturedPiece); capturedPiece = Piece(); }
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr - 2, pc + 1);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr - 2, pc + 1, capturedPiece); capturedPiece = Piece(); }
+				}
+			}
+		}
+		if (pr + 2 < 8 && pc - 1 >= 0)
+		{
+			if (pieces[pr + 2][pc - 1].isAliveFun() == false || pieces[pr + 2][pc - 1].m_colorFun() == opp)
+			{
+				if (pieces[pr + 2][pc - 1].m_colorFun() == opp) capturedPiece = pieces[pr + 2][pc - 1];
+				updatePiecePosition(pr + 2, pc - 1, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr + 2, pc - 1);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr + 2, pc - 1, capturedPiece); capturedPiece = Piece(); }
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr + 2, pc - 1);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr + 2, pc - 1, capturedPiece); capturedPiece = Piece(); }
+				}
+			}
+		}
+		if (pr - 2 >= 0 && pc - 1 >= 0)
+		{
+			if (pieces[pr - 2][pc - 1].isAliveFun() == false || pieces[pr - 2][pc - 1].m_colorFun() == opp)
+			{
+				if (pieces[pr - 2][pc - 1].m_colorFun() == opp) capturedPiece = pieces[pr - 2][pc - 1];
+				updatePiecePosition(pr - 2, pc - 1, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr - 2, pc - 1);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr - 2, pc - 1, capturedPiece); capturedPiece = Piece(); }
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr - 2, pc - 1);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr - 2, pc - 1, capturedPiece); capturedPiece = Piece(); }
+				}
+			}
+		}
+		if (pr + 1 < 8 && pc + 2 < 8)
+		{
+			if (pieces[pr + 1][pc + 2].isAliveFun() == false || pieces[pr + 1][pc + 2].m_colorFun() == opp)
+			{
+				if (pieces[pr + 1][pc + 2].m_colorFun() == opp) capturedPiece = pieces[pr + 1][pc + 2];
+				updatePiecePosition(pr + 1, pc + 2, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr + 1, pc + 2);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr + 1, pc + 2, capturedPiece); capturedPiece = Piece(); }
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr + 1, pc + 2);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr + 1, pc + 2, capturedPiece); capturedPiece = Piece(); }
+				}
+			}
+		}
+		if (pr + 1 < 8 && pc - 2 >= 0)
+		{
+			if (pieces[pr + 1][pc - 2].isAliveFun() == false || pieces[pr + 1][pc - 2].m_colorFun() == opp)
+			{
+				if (pieces[pr + 1][pc - 2].m_colorFun() == opp) capturedPiece = pieces[pr + 1][pc - 2];
+				updatePiecePosition(pr + 1, pc - 2, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr + 1, pc - 2);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr + 1, pc - 2, capturedPiece); capturedPiece = Piece(); }
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr + 1, pc - 2);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr + 1, pc - 2, capturedPiece); capturedPiece = Piece(); }
+				}
+			}
+		}
+		if (pr - 1 >= 0 && pc + 2 < 8)
+		{
+			if (pieces[pr - 1][pc + 2].isAliveFun() == false || pieces[pr - 1][pc + 2].m_colorFun() == opp)
+			{
+				if (pieces[pr - 1][pc + 2].m_colorFun() == opp) capturedPiece = pieces[pr - 1][pc + 2];
+				updatePiecePosition(pr - 1, pc + 2, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr - 1, pc + 2);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr - 1, pc + 2, capturedPiece); capturedPiece = Piece(); }
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr - 1, pc + 2);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr - 1, pc + 2, capturedPiece); capturedPiece = Piece(); }
+				}
+			}
+		}
+		if (pr - 1 >= 0 && pc - 2 >= 0)
+		{
+			if (pieces[pr - 1][pc - 2].isAliveFun() == false || pieces[pr - 1][pc - 2].m_colorFun() == opp)
+			{
+				if (pieces[pr - 1][pc - 2].m_colorFun() == opp) capturedPiece = pieces[pr - 1][pc - 2];
+				updatePiecePosition(pr - 1, pc - 2, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr - 1, pc - 2);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr - 1, pc - 2, capturedPiece); capturedPiece = Piece(); }
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr - 1, pc - 2);
+					if (capturedPiece.isAliveFun()) { addNewPiece(pr - 1, pc - 2, capturedPiece); capturedPiece = Piece(); }
+				}
+			}
 		}
 	}
 
@@ -1798,65 +2033,189 @@ bool Board::staleChecker(int pr, int pc, Piece p)  // returns true if player has
 		{
 			if (pr + 1 < 8 && pieces[pr + 1][pc].isAliveFun() == false)
 			{
-				return true;
+				updatePiecePosition(pr + 1, pc, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr + 1, pc);
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr + 1, pc);
+				}
 			}
 			
 			if ((pr == 1) && (pieces[pr + 1][pc].isAliveFun() == false && pieces[pr + 2][pc].isAliveFun() == false))
 			{
-				return true;
+				updatePiecePosition(pr + 2, pc, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr + 2, pc);
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr + 2, pc);
+				}
 			}
 
 			if ((pr + 1 < 8 && pc + 1 < 8) && (pieces[pr + 1][pc + 1].m_colorFun() == opp))
 			{
-				return true;
+				if (pieces[pr + 1][pc + 1].m_colorFun() == opp)
+				{
+					capturedPiece = pieces[pr + 1][pc + 1];
+				}
+				updatePiecePosition(pr + 1, pc + 1, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr + 1, pc + 1);
+					if (capturedPiece.isAliveFun())
+					{
+						addNewPiece(pr + 1, pc + 1, capturedPiece);
+						capturedPiece = Piece();
+					}
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr + 1, pc + 1);
+					if (capturedPiece.isAliveFun())
+					{
+						addNewPiece(pr + 1, pc + 1, capturedPiece);
+						capturedPiece = Piece();
+					}
+				}
 			}
 
 			if ((pr + 1 < 8 && pc - 1 >= 0) && (pieces[pr + 1][pc - 1].m_colorFun() == opp))
 			{
-				return true;
+				if (pieces[pr + 1][pc - 1].m_colorFun() == opp)
+				{
+					capturedPiece = pieces[pr + 1][pc - 1];
+				}
+				updatePiecePosition(pr + 1, pc - 1, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr + 1, pc - 1);
+					if (capturedPiece.isAliveFun())
+					{
+						addNewPiece(pr + 1, pc - 1, capturedPiece);
+						capturedPiece = Piece();
+					}
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr + 1, pc - 1);
+					if (capturedPiece.isAliveFun())
+					{
+						addNewPiece(pr + 1, pc - 1, capturedPiece);
+						capturedPiece = Piece();
+					}
+				}
 			}
 		}
 
 		if (p.m_colorFun() == PieceColor::LIGHT)
 		{
-			if (pr - 1 < 8 && pieces[pr - 1][pc].isAliveFun() == false)
+			if (pr - 1 >= 0 && pieces[pr - 1][pc].isAliveFun() == false)
 			{
-				return true;
+				updatePiecePosition(pr - 1, pc, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr - 1, pc);
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr - 1, pc);
+				}
 			}
 
 			if ((pr == 6) && (pieces[pr - 1][pc].isAliveFun() == false && pieces[pr - 2][pc].isAliveFun() == false))
 			{
-				return true;
+				updatePiecePosition(pr - 2, pc, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr - 2, pc);
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr - 2, pc);
+				}
 			}
 
-			if ((pr - 1 < 8 && pc + 1 < 8) && (pieces[pr - 1][pc + 1].m_colorFun() == opp))
+			if ((pr - 1 >= 0 && pc + 1 < 8) && (pieces[pr - 1][pc + 1].m_colorFun() == opp))
 			{
-				return true;
+				if (pieces[pr - 1][pc + 1].m_colorFun() == opp)
+				{
+					capturedPiece = pieces[pr - 1][pc + 1];
+				}
+				updatePiecePosition(pr - 1, pc + 1, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr - 1, pc + 1);
+					if (capturedPiece.isAliveFun())
+					{
+						addNewPiece(pr - 1, pc + 1, capturedPiece);
+						capturedPiece = Piece();
+					}
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr - 1, pc + 1);
+					if (capturedPiece.isAliveFun())
+					{
+						addNewPiece(pr - 1, pc + 1, capturedPiece);
+						capturedPiece = Piece();
+					}
+				}
 			}
 
 			if ((pr - 1 >= 0 && pc - 1 >= 0) && (pieces[pr - 1][pc - 1].m_colorFun() == opp))
 			{
-				return true;
+				if (pieces[pr - 1][pc - 1].m_colorFun() == opp)
+				{
+					capturedPiece = pieces[pr - 1][pc - 1];
+				}
+				updatePiecePosition(pr - 1, pc - 1, pr, pc);
+				if (!checkForCheck(col))
+				{
+					updatePiecePosition(pr, pc, pr - 1, pc - 1);
+					if (capturedPiece.isAliveFun())
+					{
+						addNewPiece(pr - 1, pc - 1, capturedPiece);
+						capturedPiece = Piece();
+					}
+					return true;
+				}
+				else
+				{
+					updatePiecePosition(pr, pc, pr - 1, pc - 1);
+					if (capturedPiece.isAliveFun())
+					{
+						addNewPiece(pr - 1, pc - 1, capturedPiece);
+						capturedPiece = Piece();
+					}
+				}
 			}
 		}
 	}
-
-	Piece capturedPiece = Piece();
 
 	int i = pr;
 	int j = pc;
 	int or = pr;
 	int oc = pc;
 
-	PieceColor col = p.m_colorFun();
 	PieceColor opponent = opp;
-
 
 	if (p.m_typeFun() == PieceType::KING)
 	{
 		if ((i + 1 < 8) && (pieces[i + 1][j].isAliveFun() == false || pieces[i + 1][j].m_colorFun() == opponent))
 		{
-			if (pieces[i + 1][j].m_colorFun() == opp)
+			if (pieces[i + 1][j].m_colorFun() == opponent)
 			{
 				capturedPiece = pieces[i + 1][j];
 			}

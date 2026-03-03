@@ -7,6 +7,8 @@
 Game::Game(){}
 
 
+
+
 bool Game::checkMouseCoord(Board& board)
 {
 		Vector2 mouse = GetMousePosition();
@@ -151,6 +153,7 @@ void Game::initialize()
 							{
 								board.addNewPiece(nr, nc, capturedPiece);
 							}
+							board.unHightlightTile(r, c);
 							currentState = STATE::SELECT_PIECE;
 							continue;
 						}
@@ -164,15 +167,15 @@ void Game::initialize()
 							check = false;
 						}
 
-						// Function call to check stalemate - (Incomplete)
-						/*if (!check)
+						if (!check)
 						{
 							if (board.checkForStaleMate(opp))
 							{
 								currentState = STATE::GAME_OVER;
+								stalemate = true;
 								continue;
 							}
-						}*/
+						}
 
 						if (check == true)
 						{
@@ -228,18 +231,28 @@ void Game::initialize()
 					board.clearPromoteFlag();
 				}
 			}
+			board.unHightlightTile(r, c);
 		}
 		else if (currentState == STATE::GAME_OVER)
 		{
-			if (currentTurn == PieceColor::DARK)
+
+			if (stalemate)
 			{
 				DrawRectangle(150, 300, 500, 100, Color{ 255, 255, 255, 150 });
-				DrawText("Black Won", 150, 300, 100, BLACK);
+				DrawText("Stalemate", 150, 300, 100, BLACK);
 			}
-			else
+			else 
 			{
-				DrawRectangle(150, 300, 500, 100, Color{ 0, 0, 0, 150 });
-				DrawText("White Won", 150, 300, 100, WHITE);
+				if (currentTurn == PieceColor::DARK)
+				{
+					DrawRectangle(150, 300, 500, 100, Color{ 255, 255, 255, 150 });
+					DrawText("Black Won", 150, 300, 100, BLACK);
+				}
+				else
+				{
+					DrawRectangle(150, 300, 500, 100, Color{ 0, 0, 0, 150 });
+					DrawText("White Won", 150, 300, 100, WHITE);
+				}
 			}
 			
 			currentState = STATE::GAME_OVER;

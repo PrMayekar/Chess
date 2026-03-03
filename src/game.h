@@ -23,6 +23,7 @@ protected:
 	PieceColor opp;
 	bool check = false;
 	bool choosePromotion = false;
+	bool stalemate = false;
 
 public:
 	Game();
@@ -31,4 +32,5 @@ public:
 	bool checkMouseCoord(Board& board);
 	void initialize();
 	void start();
+	void setStalemateFlag();
 };
