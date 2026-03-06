@@ -154,6 +154,7 @@ void Game::initialize()
 								board.addNewPiece(nr, nc, capturedPiece);
 							}
 							board.unHightlightTile(r, c);
+							board.clearCheckFlag();
 							currentState = STATE::SELECT_PIECE;
 							continue;
 						}
@@ -161,10 +162,12 @@ void Game::initialize()
 						if (board.checkForCheck(opp))
 						{
 							check = true;
+							board.setCheckFlag();
 						}
 						else
 						{
 							check = false;
+							board.clearCheckFlag();
 						}
 
 						if (!check)

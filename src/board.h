@@ -10,7 +10,10 @@
 class Board
 {
 protected:
+	bool check = false;
 	bool promoteFlag = false;
+	bool darkCastleFlag = true;
+	bool lightCastleFlag = true;
 	Piece pieces[TILES][TILES];
 	Tile board[TILES][TILES];
 	Piece lightPromotion[4];
@@ -41,4 +44,13 @@ public:
 	void highlightTile(int i, int j);
 	void unHightlightTile(int j, int i);
 	Vector2 findKingPosition(PieceColor col);
+	bool getDarkCastleFlag();
+	void clearDarkCastleFlag();
+	bool getLightCastleFlag();
+	void clearLightCastleFlag();
+	void setLightCastleFlag();
+	void setDarkCastleFlag();
+	bool getCheckFlag();
+	void setCheckFlag();
+	void clearCheckFlag();
 };

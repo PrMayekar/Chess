@@ -19,6 +19,51 @@ void Board::promote(int r, int c, PieceColor col)
 }
 
 
+bool Board::getDarkCastleFlag()
+{
+	return darkCastleFlag;
+}
+
+void Board::clearDarkCastleFlag()
+{
+	darkCastleFlag = false;
+}
+
+bool Board::getLightCastleFlag()
+{
+	return lightCastleFlag;
+}
+
+void Board::clearLightCastleFlag()
+{
+	lightCastleFlag = false;
+}
+
+void Board::setLightCastleFlag()
+{
+	lightCastleFlag = true;
+}
+
+void Board::setDarkCastleFlag()
+{
+	darkCastleFlag = true;
+}
+
+bool Board::getCheckFlag()
+{
+	return check;
+}
+
+void Board::setCheckFlag()
+{
+	check = true;
+}
+
+void Board::clearCheckFlag()
+{
+	check = false;
+}
+
 void Board::highlightTile(int j, int i)
 {
 	Rectangle rec = { (float)i * TILESIZE, (float)j * TILESIZE, TILESIZE, TILESIZE };
@@ -219,6 +264,10 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 			i += stepR;
 			j += stepC;
 		}
+		if ((darkCastleFlag) && (pieces[or][oc].m_colorFun()==PieceColor::DARK))
+			darkCastleFlag = false;
+		if ((lightCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT))
+			lightCastleFlag = false;
 		return true;
 	}
 	else if (selectedPiece == PieceType::BISHOP)
@@ -312,36 +361,213 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 
 		if ((i - 1 >= 0 && j - 1 >= 0) && (i - 1 == r && j - 1 == c))
 		{
+			if ((darkCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::DARK))
+				darkCastleFlag = false;
+			if ((lightCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT))
+				lightCastleFlag = false;
 			return true;
 		}
 		else if ((i + 1 < 8 && j - 1 >= 0) && (i + 1 == r && j - 1 == c)) 
 		{
+			if ((darkCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::DARK))
+				darkCastleFlag = false;
+			if ((lightCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT))
+				lightCastleFlag = false;
 			return true;
 		}
 		else if ((i - 1 >= 0 && j + 1 < 8) && (i - 1 == r && j + 1 == c))
 		{
+			if ((darkCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::DARK))
+				darkCastleFlag = false;
+			if ((lightCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT))
+				lightCastleFlag = false;
 			return true;
 		}
 		else if ((i + 1 < 8 && j + 1 < 8) && (i + 1 == r && j + 1 == c))
 		{
+			if ((darkCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::DARK))
+				darkCastleFlag = false;
+			if ((lightCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT))
+				lightCastleFlag = false;
 			return true;
 		}
 		else if ((i - 1 >= 0 && i - 1 == r) && (j == c))
 		{
+			if ((darkCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::DARK))
+				darkCastleFlag = false;
+			if ((lightCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT))
+				lightCastleFlag = false;
 			return true;
 		}
 		else if ((i + 1 < 8 && i + 1 == r) && (j==c))
 		{
+			if ((darkCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::DARK))
+				darkCastleFlag = false;
+			if ((lightCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT))
+				lightCastleFlag = false;
 			return true;
 		}
 		else if ((j - 1 >= 0 && j - 1 == c) && (i==r))
 		{
+			if ((darkCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::DARK))
+				darkCastleFlag = false;
+			if ((lightCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT))
+				lightCastleFlag = false;
 			return true;
 		}
 		else if ((j + 1 < 8 && j + 1 == c) && (i==r))
 		{
+			if ((darkCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::DARK))
+				darkCastleFlag = false;
+			if ((lightCastleFlag) && (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT))
+				lightCastleFlag = false;
 			return true;
 		}
+
+		if (!check)
+		{
+			if ((darkCastleFlag == true) && ((pieces[i][j].m_colorFun() == PieceColor::DARK && (i == 0 && j == 4)) && (r == 0 && c == 6)))
+			{
+				if (pieces[0][7].m_typeFun() == PieceType::ROOK && pieces[0][7].m_colorFun() == PieceColor::DARK)
+				{
+					if (pieces[0][5].isAliveFun() == false && pieces[0][6].isAliveFun() == false)
+					{
+						updatePiecePosition(i, j + 1, i, j);
+						if (!checkForCheck(PieceColor::DARK))
+						{
+						}
+						else
+						{
+							updatePiecePosition(i, j, i, j + 1);
+							return false;
+						}
+						updatePiecePosition(i, j, i, j + 1);
+
+						updatePiecePosition(i, j + 2, i, j);
+						updatePiecePosition(0, 5, 0, 7);
+						if (!checkForCheck(PieceColor::DARK))
+						{
+						}
+						else
+						{
+							updatePiecePosition(0, 7, 0, 5);
+							updatePiecePosition(i, j, i, j + 2);
+							return false;
+						}
+						darkCastleFlag = false;
+						updatePiecePosition(i, j, i, j + 2);
+						return true;
+					}
+				}
+			}
+
+
+			if ((darkCastleFlag == true) && ((pieces[i][j].m_colorFun() == PieceColor::DARK && (i == 0 && j == 4)) && (r == 0 && c == 2)))
+			{
+				if (pieces[0][0].m_typeFun() == PieceType::ROOK && pieces[0][0].m_colorFun() == PieceColor::DARK)
+				{
+					if (pieces[0][1].isAliveFun() == false && pieces[0][2].isAliveFun() == false && pieces[0][3].isAliveFun() == false)
+					{
+						updatePiecePosition(i, j - 1, i, j);
+						if (!checkForCheck(PieceColor::DARK))
+						{
+						}
+						else
+						{
+							updatePiecePosition(i, j, i, j - 1);
+							return false;
+						}
+						updatePiecePosition(i, j, i, j - 1);
+
+						updatePiecePosition(i, j - 2, i, j);
+						updatePiecePosition(0, 3, 0, 0);
+						if (!checkForCheck(PieceColor::DARK))
+						{
+						}
+						else
+						{
+							updatePiecePosition(0, 0, 0, 3);
+							updatePiecePosition(i, j, i, j - 2);
+							return false;
+						}
+						darkCastleFlag = false;
+						updatePiecePosition(i, j, i, j - 2);
+						return true;
+					}
+				}
+			}
+
+			if ((lightCastleFlag == true) && ((pieces[i][j].m_colorFun() == PieceColor::LIGHT && (i == 7 && j == 4)) && (r == 7 && c == 6)))
+			{
+				if (pieces[7][7].m_typeFun() == PieceType::ROOK && pieces[7][7].m_colorFun() == PieceColor::LIGHT)
+				{
+					if (pieces[7][5].isAliveFun() == false && pieces[7][6].isAliveFun() == false)
+					{
+						updatePiecePosition(i, j + 1, i, j);
+						if (!checkForCheck(PieceColor::LIGHT))
+						{
+						}
+						else
+						{
+							updatePiecePosition(i, j, i, j + 1);
+							return false;
+						}
+						updatePiecePosition(i, j, i, j + 1);
+
+						updatePiecePosition(i, j + 2, i, j);
+						updatePiecePosition(7, 5, 7, 7);
+						if (!checkForCheck(PieceColor::LIGHT))
+						{
+						}
+						else
+						{
+							updatePiecePosition(7, 7, 7, 5);
+							updatePiecePosition(i, j, i, j + 2);
+							return false;
+						}
+						lightCastleFlag = false;
+						updatePiecePosition(i, j, i, j + 2);
+						return true;
+					}
+				}
+			}
+
+			if ((lightCastleFlag == true) && ((pieces[i][j].m_colorFun() == PieceColor::LIGHT && (i == 7 && j == 4)) && (r == 7 && c == 2)))
+			{
+				if (pieces[7][0].m_typeFun() == PieceType::ROOK && pieces[7][0].m_colorFun() == PieceColor::LIGHT)
+				{
+					if (pieces[7][1].isAliveFun() == false && pieces[7][2].isAliveFun() == false && pieces[7][3].isAliveFun() == false)
+					{
+						updatePiecePosition(i, j - 1, i, j);
+						if (!checkForCheck(PieceColor::LIGHT))
+						{
+						}
+						else
+						{
+							updatePiecePosition(i, j, i, j - 1);
+							return false;
+						}
+						updatePiecePosition(i, j, i, j - 1);
+
+						updatePiecePosition(i, j - 2, i, j);
+						updatePiecePosition(7, 3, 7, 0);
+						if (!checkForCheck(PieceColor::LIGHT))
+						{
+						}
+						else
+						{
+							updatePiecePosition(7, 0, 7, 3);
+							updatePiecePosition(i, j, i, j - 2);
+							return false;
+						}
+						lightCastleFlag = false;
+						updatePiecePosition(i, j, i, j - 2);
+						return true;
+					}
+				}
+			}
+		}
+		
 		return false;
 	}
 	else if (selectedPiece == PieceType::PAWN)
@@ -424,6 +650,7 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 			}
 		}
 	}
+
 	return false;
 }
 
