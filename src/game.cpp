@@ -178,6 +178,12 @@ void Game::initialize()
 								stalemate = true;
 								continue;
 							}
+
+							if (board.promoteFlagCheck())
+							{
+								currentState = STATE::PAWN_PROMOTION;
+								continue;
+							}
 						}
 
 						if (check == true)
@@ -189,13 +195,18 @@ void Game::initialize()
 							}
 						}
 
-						if (board.promoteFlagCheck())
-						{
-							currentState = STATE::PAWN_PROMOTION;
-							continue;
-						}
+						
 
 						board.unHightlightTile(r, c);
+
+						if (board.getEnPassantFlag()==2)
+						{
+							board.decEnPassant();
+						}
+						else if (board.getEnPassantFlag() == 1)
+						{
+							board.decEnPassant();
+						}
 
 						currentTurn = opp;
 						currentState = STATE::SELECT_PIECE;

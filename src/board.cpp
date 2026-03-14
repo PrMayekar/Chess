@@ -238,6 +238,73 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 {
 	PieceType selectedPiece = pieceType(or , oc);
 
+	if (enPassant == 1 && abs(enPassantCol - oc) == 1)
+	{
+		PieceColor enPassantPieceColor = pieces[enPassantRow][enPassantCol].m_colorFun();
+		PieceColor currentColor = pieces[or ][oc].m_colorFun();
+		Piece capturedPiece = Piece();
+
+		if (selectedPiece == PieceType::PAWN)
+		{ 
+			capturedPiece = pieces[enPassantRow][enPassantCol];
+			if (currentColor == PieceColor::DARK)
+			{
+				if ((or==enPassantRow) && (abs(enPassantCol - oc) == 1))
+				{
+					if (r == enPassantRow + 1 && c == enPassantCol)
+					{
+						updatePiecePosition(r, c, or , oc);
+						pieces[enPassantRow][enPassantCol] = Piece();
+						if (checkForCheck(currentColor))
+						{
+							updatePiecePosition(or , oc, r, c);
+							pieces[enPassantRow][enPassantCol] = capturedPiece;
+							capturedPiece = Piece();
+							return false;
+						}
+						updatePiecePosition(or , oc, r, c);
+						enPassantRow = -1;
+						enPassantCol = -1;
+						enPassant = 0;
+						return true;
+					}
+				}
+			}
+			else if (currentColor == PieceColor::LIGHT)
+			{
+				if ((or==enPassantRow) && (abs(enPassantCol - oc) == 1))
+				{
+					if (r == enPassantRow - 1 && c == enPassantCol)
+					{
+						updatePiecePosition(r, c, or , oc);
+						pieces[enPassantRow][enPassantCol] = Piece();
+						if (checkForCheck(currentColor))
+						{
+							updatePiecePosition(or , oc, r, c);
+							pieces[enPassantRow][enPassantCol] = capturedPiece;
+							capturedPiece = Piece();
+							return false;
+						}
+						updatePiecePosition(or , oc, r, c);
+						enPassantRow = -1;
+						enPassantCol = -1;
+						enPassant = 0;
+						return true;
+					}
+				}
+			}
+		}
+		/*enPassant = 0;*/
+		/*enPassantRow = -1;
+		enPassantCol = -1;*/
+	}
+	else
+	{
+		/*enPassant = 0;*/
+		enPassantRow = -1;
+		enPassantCol = -1;
+	}
+
 	if (selectedPiece == PieceType::ROOK)
 	{
 		if (r!=or && c != oc)
@@ -424,7 +491,7 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 			return true;
 		}
 
-		if (!check)
+		if (!checkForCheck(PieceColor::DARK))
 		{
 			if ((darkCastleFlag == true) && ((pieces[i][j].m_colorFun() == PieceColor::DARK && (i == 0 && j == 4)) && (r == 0 && c == 6)))
 			{
@@ -496,7 +563,10 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 					}
 				}
 			}
+		}
 
+		if(!checkForCheck(PieceColor::LIGHT))
+		{
 			if ((lightCastleFlag == true) && ((pieces[i][j].m_colorFun() == PieceColor::LIGHT && (i == 7 && j == 4)) && (r == 7 && c == 6)))
 			{
 				if (pieces[7][7].m_typeFun() == PieceType::ROOK && pieces[7][7].m_colorFun() == PieceColor::LIGHT)
@@ -580,10 +650,26 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 				{
 					if (r == 0)
 					{
-						promoteFlag = true;
+						updatePiecePosition(r, c, or , oc);
+						if (checkForCheck(PieceColor::LIGHT))
+						{
+							updatePiecePosition(or , oc, r, c);
+						}
+						else
+						{
+							updatePiecePosition(or , oc, r, c);
+							promoteFlag = true;
+						}
+					}
+					if (r==or-2 &&(enPassant==false))
+					{
+						enPassant = 2;
+						enPassantRow = r;
+						enPassantCol = c;
+						return true;
 					}
 					return true;
-				}	
+				}
 				else
 				{
 					return false;
@@ -595,7 +681,23 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 				{
 					if (r == 7)
 					{
-						promoteFlag = true;
+						updatePiecePosition(r, c, or , oc);
+						if (checkForCheck(PieceColor::DARK))
+						{
+							updatePiecePosition(or , oc, r, c);
+						}
+						else
+						{
+							updatePiecePosition(or , oc, r, c);
+							promoteFlag = true;
+						}
+					}
+					if (r==or+2 && (enPassant == false))
+					{
+						enPassantRow = r;
+						enPassantCol = c;
+						enPassant = 2;
+						return true;
 					}
 					return true;
 				}
@@ -609,13 +711,28 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 		{
 			if (abs(r - or ) == 1 && abs(c - oc) == 1)
 			{
-				if (pieces[or][oc].m_colorFun() == PieceColor::LIGHT)
+				Piece capturedPiece = Piece();
+				if (pieces[or ][oc].m_colorFun() == PieceColor::LIGHT)
 				{
 					if ((r < or ) && ((pieces[r][c].isAliveFun() == true) && (pieces[r][c].m_colorFun() == PieceColor::DARK)))
 					{
 						if (r == 0)
 						{
-							promoteFlag = true;
+							capturedPiece = pieces[r][c];
+							updatePiecePosition(r, c, or , oc);
+							if (checkForCheck(PieceColor::LIGHT))
+							{
+								updatePiecePosition(or , oc, r, c);
+								addNewPiece(r, c, capturedPiece);
+								capturedPiece = Piece();
+							}
+							else
+							{
+								updatePiecePosition(or , oc, r, c);
+								addNewPiece(r, c, capturedPiece);
+								capturedPiece = Piece();
+								promoteFlag = true;
+							}
 						}
 						return true;
 					}
@@ -630,7 +747,21 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 					{
 						if (r == 7)
 						{
-							promoteFlag = true;
+							capturedPiece = pieces[r][c];
+							updatePiecePosition(r, c, or , oc);
+							if (checkForCheck(PieceColor::DARK))
+							{
+								updatePiecePosition(or , oc, r, c);
+								addNewPiece(r, c, capturedPiece);
+								capturedPiece = Piece();
+							}
+							else
+							{
+								updatePiecePosition(or , oc, r, c);
+								addNewPiece(r, c, capturedPiece);
+								capturedPiece = Piece();
+								promoteFlag = true;
+							}
 						}
 						return true;
 					}
@@ -650,8 +781,13 @@ bool Board::validateNewPosition(int r, int c, int or , int oc)
 			}
 		}
 	}
-
+	
 	return false;
+}
+
+void Board::decEnPassant()
+{
+	enPassant--;
 }
 
 Vector2 Board::findKingPosition(PieceColor col)
@@ -2643,4 +2779,19 @@ bool Board::staleChecker(int pr, int pc, Piece p)  // returns true if player has
 		}
 	}
 	return false;
+}
+
+int Board::getEnPassantFlag()
+{
+	return enPassant;
+}
+
+void Board::setEnPassantFlag()
+{
+	 enPassant = true;
+}
+
+void Board::clearEnPassantFlag()
+{
+	enPassant = false;
 }

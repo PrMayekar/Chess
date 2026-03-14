@@ -14,6 +14,9 @@ protected:
 	bool promoteFlag = false;
 	bool darkCastleFlag = true;
 	bool lightCastleFlag = true;
+	int enPassant = 0;
+	int enPassantRow = -1;
+	int enPassantCol = -1;
 	Piece pieces[TILES][TILES];
 	Tile board[TILES][TILES];
 	Piece lightPromotion[4];
@@ -53,4 +56,8 @@ public:
 	bool getCheckFlag();
 	void setCheckFlag();
 	void clearCheckFlag();
+	int getEnPassantFlag();
+	void setEnPassantFlag();
+	void clearEnPassantFlag();
+	void decEnPassant();
 };
