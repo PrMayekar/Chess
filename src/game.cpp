@@ -3,6 +3,7 @@
 #include "resource_dir.h"
 #include "game.h"
 #include "utils.h"
+#include "mainMenu.h"
 
 Game::Game(){}
 
@@ -268,7 +269,13 @@ void Game::initialize()
 					DrawText("White Won", 150, 300, 100, WHITE);
 				}
 			}
-			
+			if (IsKeyPressed(KEY_SPACE))
+			{
+				EndDrawing();
+				CloseWindow();
+				Menu menu;
+				menu.displayMenu();
+			}
 			currentState = STATE::GAME_OVER;
 		}
 		EndDrawing();
