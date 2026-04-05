@@ -568,14 +568,15 @@ void Game::vsComAsWhite()
 
 				gamelog << "\n Computer Move: " << stf.movemove << "\n";
 
-				if (board.validateNewPosition(nr, nc, r, c) == true)
+				if (board.pieceType(r, c) == PieceType::KING && abs(c - nc) == 2)
 				{
-					board.updatePiecePosition(nr, nc, r, c);
+					board.updateBlackBotCastle(nr, nc, r, c);
 				}
 				else
 				{
-					goto endgame;
+					board.updatePiecePosition(nr, nc, r, c);
 				}
+			
 			}
 			else if (strlen(stf.movemove) == 5)
 			{
@@ -621,17 +622,16 @@ void Game::vsComAsWhite()
 				goto endgame;
 			}
 
-			if (board.checkForCheck(PieceColor::LIGHT))
+			/*if (board.checkForCheck(PieceColor::LIGHT))
 			{
 				check = true;
-				board.setCheckFlag();
 			}
 			else
 			{
 				check = false;
 				board.clearCheckFlag();
 			}
-
+		
 			if (!check)
 			{
 				if (board.checkForStaleMate(PieceColor::LIGHT))
@@ -650,7 +650,7 @@ void Game::vsComAsWhite()
 					continue;
 				}
 				check = false;
-			}
+			}*/
 			
 			currentTurn = PieceColor::LIGHT;
 			currentState = STATE::SELECT_PIECE;
@@ -977,7 +977,7 @@ void Game::vsComAsBlack()
 				goto endgame;
 			}
 
-			if (board.checkForCheck(PieceColor::DARK))
+			/*if (board.checkForCheck(PieceColor::DARK))
 			{
 				check = true;
 				board.setCheckFlag();
@@ -1006,7 +1006,7 @@ void Game::vsComAsBlack()
 					continue;
 				}
 				check = false;
-			}
+			}*/
 
 			currentTurn = PieceColor::DARK;
 			currentState = STATE::SELECT_PIECE;

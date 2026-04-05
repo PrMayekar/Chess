@@ -219,6 +219,17 @@ void Board::updatePiecePosition(int r, int c, int or, int oc)
 
 void Board::updateBlackBotCastle(int r, int c, int or , int oc)
 {
+	if (c < oc)
+	{
+		pieces[0][3] = pieces[0][0];
+		pieces[0][0] = Piece();
+	}
+	else
+	{
+		pieces[0][5] = pieces[0][7];
+		pieces[0][7] = Piece();
+	}
+
 	pieces[r][c] = pieces[or ][oc];
 	pieces[or ][oc] = Piece();
 }
@@ -813,7 +824,6 @@ Vector2 Board::findKingPosition(PieceColor col)
 
 bool Board::checkForCheck(PieceColor col)
 {
-
 	PieceColor oppositeColor;
 	int incr = 1;
 
@@ -832,6 +842,9 @@ bool Board::checkForCheck(PieceColor col)
 
 	int or =kingPosition.x;
 	int oc =kingPosition.y; 
+
+	if (kingPosition.x == -1 || kingPosition.y == -1)
+		return false;
 
 
 		if (((or +1 < 8 && pieces[or +1][oc].m_typeFun() == PieceType::KING) && (pieces[or +1][oc].m_colorFun() == oppositeColor))

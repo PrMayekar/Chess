@@ -159,7 +159,15 @@ void Stockfish::getBestMove()
         else
         {
             buff[dwRead] = '\0';
-            strcat(response3, buff);
+
+            size_t remaining = BUFSIZE - strlen(response3) - 1;
+            if (strlen(buff) < remaining)
+                strcat(response3, buff);
+            else {
+                // Buffer full, reset and keep latest
+                ZeroMemory(response3, BUFSIZE);
+                strcat(response3, buff);
+            }
 
             char* ptr = strstr(response3, "bestmove");
             if (ptr != NULL)
