@@ -217,6 +217,12 @@ void Board::updatePiecePosition(int r, int c, int or, int oc)
 	pieces[or][oc] = Piece();
 }
 
+void Board::updateBlackBotCastle(int r, int c, int or , int oc)
+{
+	pieces[r][c] = pieces[or ][oc];
+	pieces[or ][oc] = Piece();
+}
+
 void Board::updatePiecePosition2(int r, int c, int nr, PieceColor col)
 {
 	if (col == PieceColor::DARK)

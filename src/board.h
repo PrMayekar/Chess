@@ -60,4 +60,5 @@ public:
 	void setEnPassantFlag();
 	void clearEnPassantFlag();
 	void decEnPassant();
+	void updateBlackBotCastle(int r, int c, int or , int oc);
 };

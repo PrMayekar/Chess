@@ -33,4 +33,6 @@ public:
 	void initialize();
 	void start();
 	void setStalemateFlag();
+	void vsComAsWhite();
+	void vsComAsBlack();
 };

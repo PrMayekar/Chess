@@ -52,6 +52,23 @@ void Menu::displayMenu()
 		
 		DrawRectangle(120, 300, 560, 100, Color{ 255, 255, 255, 200 });
 		DrawText("NEW GAME", 130, 300, 100, BLACK);
+
+
+		//-----
+	
+		DrawRectangle(120, 450, 560, 100, Color{ 255, 255, 255, 200 });
+		DrawText("VS COM", 130, 450, 100, BLACK);
+
+
+		//---
+
+		DrawRectangle(120, 650, 560, 100, Color{ 0, 0, 0, 200 });
+		DrawText("VS COM", 130, 650, 100, WHITE);
+
+		//------
+
+
+
 		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 		{	
 			Vector2 mouse = GetMousePosition();
@@ -65,6 +82,30 @@ void Menu::displayMenu()
 				clearGameStarted();
 				goto jp;
 			}
+
+			if (CheckCollisionPointRec(mouse, { 120, 450, 560, 100 }))
+			{
+				Game game;
+				setGameStarted();
+				EndDrawing();
+				CloseWindow();
+				game.vsComAsWhite();
+				clearGameStarted();
+				goto jp;
+			}
+
+			if (CheckCollisionPointRec(mouse, { 120, 650, 560, 100 }))
+			{
+				Game game;
+				setGameStarted();
+				EndDrawing();
+				CloseWindow();
+				game.vsComAsBlack();
+				clearGameStarted();
+				return;
+			}
+
+			
 		}
 		EndDrawing();
 	}
