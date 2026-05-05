@@ -91,7 +91,7 @@ Stockfish runs as a **child process** and communicates via **Windows named pipes
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/chess-cpp-raylib.git
+git clone https://github.com/PrMayekar/Chess.git
 cd chess-cpp-raylib
 ```
 
