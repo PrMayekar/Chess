@@ -1,10 +1,11 @@
 # Chess Game in C++ using Raylib & Stockfish
 
 A fully functional desktop chess game built in C++ using the Raylib graphics library, with Stockfish engine integration for AI opponent gameplay.
+(Download the exe from releases to play)
 
 ---
 
-## 📸 Preview
+## Preview
 1. Menu: 
 <p align="center">
   <img src="images/menu.png" width="600"/>
