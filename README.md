@@ -5,12 +5,29 @@ A fully functional desktop chess game built in C++ using the Raylib graphics lib
 ---
 
 ## 📸 Preview
+1. Menu: 
+<p align="center">
+  <img src="images/menu.png" width="600"/>
+</p>
 
-> *Two-player and vs AI gameplay on an 800x800 board with piece highlight and promotion UI*
+2. In Game: 
+<p align="center">
+  <img src="images/game.png" width="600"/>
+</p>
+
+3. Pawn Promotion: 
+<p align="center">
+  <img src="images/pawnpromotion.png" width="600"/>
+</p>
+
+4. Game Over: 
+<p align="center">
+  <img src="images/gameover.png" width="600"/>
+</p>
 
 ---
 
-## ✨ Features
+## Features
 
 - 1 Two-player Pass & Play mode
 - 2 Play as White or Black against Stockfish AI
@@ -39,7 +56,7 @@ A fully functional desktop chess game built in C++ using the Raylib graphics lib
 
 
 
-## ⚙️ How It Works
+## How It Works
 
 ### Game State Machine
 The game runs on a state machine with the following states:
